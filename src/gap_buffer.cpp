@@ -49,18 +49,28 @@ void move_cursor_right(GapBuffer &b) {
 }
 
 void move_cursor_up(GapBuffer &b){
+    
     CursorPos pos = get_cursor_pos(b);
     int target_col = pos.col;
     if (b.gap_start == 0) return;
+    
     while (b.gap_start > 0 && b.data[b.gap_start - 1] != '\n')
         move_cursor_left(b);
-
+    
     if (b.gap_start == 0) return;
-    move_cursor_left(b);    
-    int col = b.gap_start;
-    while ((col > target_col) && b.gap_start > 0) {
+    
+    move_cursor_left(b);
+    
+    // We need to go back to the start of the pervious line because it is dumb. 
+    // It being dumb is the reason we are doing that. Totally.
+    // Jk the reason is we just know the length from the start. We don't know the length from column to end.
+    while (b.gap_start > 0 && b.data[b.gap_start - 1] != '\n')
         move_cursor_left(b);
-        col--;
+    
+    int col = 0;
+    while (col < target_col && b.gap_end < b.data.size() && b.data[b.gap_end] != '\n') {
+        move_cursor_right(b);
+        col++;
     }
 }
 
