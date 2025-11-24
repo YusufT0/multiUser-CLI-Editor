@@ -10,6 +10,7 @@ add_library(gapbuffer
     src/gap_buffer.cpp
     src/file_io.cpp
     src/terminal.cpp
+    src/clipboard.cpp
 )
 
 # Main editor executable

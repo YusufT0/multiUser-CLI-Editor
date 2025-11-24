@@ -1,0 +1,35 @@
+Client connects to server
+server: send_full_page_to_client()
+client: show_page()
+
+Client requests write permission (CTRL+W)
+server: check_mux() -> if available -> lock_mux()
+client: retrieve_answer() -> using_mux()
+
+Client is writing
+server: retrieve_char() -> update_all_client_pages()
+client: update_page()
+
+Client closes writing mode (CTRL+P)
+server: unlock_mux()
+client: relieve_mux()
+
+Client disconnects (CTRL+Q)
+server: if disconnected client holds mux -> force_unlock_mux()
+client: save_page() -> exit(0)
+
+Server sends real-time updates from other users
+server: detect_change() -> broadcast_delta_to_all()
+client: apply_remote_delta() -> show_page()
+
+Server handles mid-edit network disconnect
+server: force_unlock_mux() -> broadcast_mux_status()
+client: fallback_reconnect() or inform_user_mux_lost()
+
+Client scrolls page without write permission
+server: no action
+client: scroll_viewport()
+
+Client requests mux status
+server: send_mux_owner()
+client: show_mux_indicator()
