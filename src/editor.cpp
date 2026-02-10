@@ -16,93 +16,74 @@ Editor::Editor(const std::string& p) {
 }
 
 void Editor::start_writing() {
-    enableRawMode();
+    TerminalManager::enableRawMode();
     ViewService::print_buffer(gap_buffer, highligter, DEBUG_GAP);
     while (true) {
-        BufferService::update_gap_buffer(gap_buffer, path, highligter);
+        // BufferService::update_gap_buffer(gap_buffer, path, highligter);
+        process_input();
         ViewService::print_buffer(gap_buffer, highligter, DEBUG_GAP);
     }
 }
 
+using namespace TerminalManager;
 void Editor::process_input() {
-    char c;
-    if (read(STDIN_FILENO, &c, 1) != 1) return;
+    InputEvent e = read_input();
+    if (e.key == Key::None) return;
 
-    if ((unsigned char)c >= 0xC2) {
-        char throwaway;
-        read(STDIN_FILENO, &throwaway, 1);
-        return;
+    // --- GLOBAL SELECTION LOGIC ---
+    // If Shift is held, ensure we are in selection mode.
+    if (e.shift_held && !highligter.active) {
+        SelectionService::start(highligter, gap_buffer);
     }
-
-    if (c == 27) { // ESC
-        char seq[3];
-        if (read(STDIN_FILENO, &seq[0], 1) != 1) return;
-        if (seq[0] == '[') {
-            if (read(STDIN_FILENO, &seq[1], 1) != 1) return;
-
-            // Arrows (Move & Clear Selection)
-            if (seq[1] == 'A') { SelectionService::clear(highligter); BufferService::move_cursor_up(gap_buffer);    return; }
-            if (seq[1] == 'B') { SelectionService::clear(highligter); BufferService::move_cursor_down(gap_buffer);  return; }
-            if (seq[1] == 'C') { SelectionService::clear(highligter); BufferService::move_cursor_right(gap_buffer); return; }
-            if (seq[1] == 'D') { SelectionService::clear(highligter); BufferService::move_cursor_left(gap_buffer);  return; }
-
-            // Shift+Arrows (Move & Update Selection)
-            if (seq[1] == '1') {
-                char dummy;
-                read(STDIN_FILENO, &dummy, 1); read(STDIN_FILENO, &dummy, 1);
-                char dir;
-                if (read(STDIN_FILENO, &dir, 1) != 1) return;
-
-                if (!highligter.active) SelectionService::start(highligter, gap_buffer);
-
-                if (dir == 'A') BufferService::move_cursor_up(gap_buffer);
-                if (dir == 'B') BufferService::move_cursor_down(gap_buffer);
-                if (dir == 'C') BufferService::move_cursor_right(gap_buffer);
-                if (dir == 'D') BufferService::move_cursor_left(gap_buffer);
-                
-                SelectionService::update_endpoint(highligter, gap_buffer);
-                return;
-            }
-        }
+    // If Shift is NOT held and we move, clear selection.
+    // (Exceptions: Char insertion and Backspace handle their own logic)
+    if (!e.shift_held && e.key != Key::Char && e.key != Key::Backspace && 
+        e.key != Key::Copy && e.key != Key::Paste) {
         SelectionService::clear(highligter);
-        return;
     }
 
-    if (c == 127 || c == '\b') {
-        if (gap_buffer.gap_start > 0 && !highligter.active) {
-            gap_buffer.gap_start--; // Or BufferService::delete_backspace(gap_buffer)
-        }
-        return;
+    // --- COMMAND DISPATCH ---
+    switch (e.key) {
+        case Key::Up:    
+            BufferService::move_cursor_up(gap_buffer);    
+            break;
+        case Key::Down:  
+            BufferService::move_cursor_down(gap_buffer);  
+            break;
+        case Key::Left:  
+            BufferService::move_cursor_left(gap_buffer);  
+            break;
+        case Key::Right: 
+            BufferService::move_cursor_right(gap_buffer); 
+            break;
+            
+        case Key::Backspace:
+            // BufferService::delete_backspace(gap_buffer); // Implement this in buffer_service
+            if (gap_buffer.gap_start > 0) gap_buffer.gap_start--; 
+            break;
+            
+        case Key::Char:
+        case Key::Enter: // Treated as char '\n'
+            BufferService::insert_char(gap_buffer, e.value);
+            break;
+
+        case Key::Quit:
+            save_file(gap_buffer, path);
+            exit(0);
+
+        case Key::Copy:
+            // Logic to copy selection to clipboard
+            break;
+
+        case Key::Paste:
+            for (char c : clipboard) BufferService::insert_char(gap_buffer, c);
+            break;
+            
+        default: break;
     }
 
-    // CTRL+Q (Quit)
-    if (c == 17) {
-        save_file(gap_buffer, path); // Access 'path' member directly
-        exit(0);
+    // --- POST-MOVE UPDATE ---
+    if (e.shift_held) {
+        SelectionService::update_endpoint(highligter, gap_buffer);
     }
-
-    // CTRL+C (Copy)
-    if (c == 3) {
-        if (highligter.active) {
-            string out;
-            int start = min(highligter.start, highligter.end);
-            int end   = max(highligter.start, highligter.end);
-            for (int i = start; i < end; i++) {
-                if (i >= gap_buffer.gap_start && i < gap_buffer.gap_end) continue;
-                out.push_back(gap_buffer.data[i]);
-            }
-            clipboard = out;
-        }
-        return;
-    }
-
-    // CTRL+V (Paste)
-    if (c == 22) {
-        for (char clip_c : clipboard) {
-            BufferService::insert_char(gap_buffer, clip_c);
-        }
-        return;
-    }
-
-    BufferService::insert_char(gap_buffer, c);
 }
