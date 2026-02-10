@@ -1,4 +1,4 @@
-#include "terminal.hpp"
+#include "terminal_manager.hpp"
 #include <termios.h>
 #include <unistd.h>
 #include <stdlib.h>

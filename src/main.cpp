@@ -1,7 +1,8 @@
-#include "terminal.hpp"
-#include "gap_buffer.hpp"
+#include "terminal_manager.hpp"
+#include "buffer_service.hpp"
 #include "file_io.hpp"
 #include "clipboard.hpp"
+#include "editor.hpp"
 #include <iostream>
 using namespace std;
 int main(int argc, char**argv){
@@ -9,16 +10,14 @@ int main(int argc, char**argv){
         cout << "Usage: ./editor <filename>\n";
         return 1;
     }
-    GapBuffer gb = create_gap_buffer();
-    Highlight hl = create_highlight();
-    load_file(gb, argv[1]);
     CursorPos curp = {0, 0};
-    enableRawMode();
-    print_buffer(gb, hl);
-    while (true) {
-        update_gap_buffer(gb, argv[1], hl);
-        print_buffer(gb, hl);
+    try {
+        Editor editor(argv[1]);
+        editor.start_writing();
+    } catch (const std::runtime_error& e) {
+        cerr << e.what() << '\n';
+        return 1;
     }
-    disableRawMode();
+
     return 0;
 }

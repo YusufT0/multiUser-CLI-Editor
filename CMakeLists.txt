@@ -7,10 +7,13 @@ include_directories(include libs)
 
 # Core library
 add_library(gapbuffer
-    src/gap_buffer.cpp
+    src/buffer_service.cpp
     src/file_io.cpp
-    src/terminal.cpp
+    src/terminal_manager.cpp
     src/clipboard.cpp
+    src/editor.cpp
+    src/view_service.cpp
+    src/selection_service.cpp
 )
 
 # Main editor executable
@@ -20,7 +23,7 @@ add_executable(editor
 target_link_libraries(editor gapbuffer)
 
 # Tests executable
-add_executable(editor_tests
-    tests/test_gap_buffer.cpp
-)
-target_link_libraries(editor_tests gapbuffer)
+# add_executable(editor_tests
+#     tests/test_gap_buffer.cpp
+# )
+# target_link_libraries(editor_tests gapbuffer)

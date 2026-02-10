@@ -1,30 +1,31 @@
 #include "file_io.hpp"
+#include "buffer_service.hpp"
 #include <fstream>
 using namespace std;
 
+GapBuffer load_file(const std::string& path) {
+    GapBuffer b = BufferService::create_gap_buffer();
 
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        std::ofstream create(path);   // create empty file
+        return b;                     // start with empty buffer
+    }
 
-void load_file(GapBuffer &b, const string &path) {
-    
-    ifstream file(path);
-    
-    if (!file.is_open()) return;
-    
-    vector<char> temp;
+    std::vector<char> temp;
     char c;
-    
     while (file.get(c)) temp.push_back(c);
-    
+
     int gap_size = 1024;
-    
     b.data.clear();
     b.data.resize(gap_size + temp.size());
     b.gap_start = 0;
     b.gap_end = gap_size;
-    
-    for (int i = 0; i < temp.size(); i++)
+
+    for (size_t i = 0; i < temp.size(); i++)
         b.data[b.gap_end + i] = temp[i];
-    
+
+    return b;
 }
 
 

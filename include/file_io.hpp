@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
-#include "gap_buffer.hpp"
-void load_file(GapBuffer&, const std::string&);
+#include "models.hpp"
+
+GapBuffer load_file(const std::string&);
 void save_file(const GapBuffer&, const std::string&);
