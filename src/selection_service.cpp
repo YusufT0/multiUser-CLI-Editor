@@ -2,6 +2,14 @@
 
 namespace SelectionService {
 
+    Highlight create_highlight(){
+        Highlight hl;
+        hl.active = false;
+        hl.start = 0;
+        hl.end = 0;
+
+        return hl;
+    }
     void clear(Highlight &hl) {
         hl.active = false;
         hl.start = 0;

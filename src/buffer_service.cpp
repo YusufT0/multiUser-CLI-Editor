@@ -18,17 +18,6 @@ namespace BufferService{
     buffer.gap_end = 1024;
     return buffer;
 };
-
-
-Highlight create_highlight(){
-    Highlight hl;
-    hl.active = false;
-    hl.start = 0;
-    hl.end = 0;
-
-    return hl;
-}
-
 void move_cursor_left(GapBuffer &b) {
     if (b.gap_start == 0) return;
 
@@ -216,130 +205,129 @@ void insert_char(GapBuffer &buffer, char c){
 
 // Ensure you have #include "selection_service.hpp" at the top of this file
 
-void update_gap_buffer(GapBuffer &buffer, const std::string &filename, Highlight &hl) {
-    char c;
-    if (read(STDIN_FILENO, &c, 1) != 1) return;
+// void update_gap_buffer(GapBuffer &buffer, const std::string &filename, Highlight &hl) {
+//     char c;
+//     if (read(STDIN_FILENO, &c, 1) != 1) return;
 
-    unsigned char uc = (unsigned char)c;
+//     unsigned char uc = (unsigned char)c;
 
-    if (uc >= 0xC2) {
-        char throwaway;
-        read(STDIN_FILENO, &throwaway, 1);
-        return;  
-    }
+//     if (uc >= 0xC2) {
+//         char throwaway;
+//         read(STDIN_FILENO, &throwaway, 1);
+//         return;  
+//     }
 
-    // ESC / arrows / shift+arrows
-    if (c == 27) { // ESC
-        char seq1;
-        if (read(STDIN_FILENO, &seq1, 1) != 1) return;
+//     // ESC / arrows / shift+arrows
+//     if (c == 27) { // ESC
+//         char seq1;
+//         if (read(STDIN_FILENO, &seq1, 1) != 1) return;
 
-        if (seq1 == '[') {
-            char seq2;
-            if (read(STDIN_FILENO, &seq2, 1) != 1) return;
+//         if (seq1 == '[') {
+//             char seq2;
+//             if (read(STDIN_FILENO, &seq2, 1) != 1) return;
 
-            // --- STANDARD ARROWS (Clear selection, then move) ---
-            if (seq2 == 'A') {
-                SelectionService::clear(hl);
-                move_cursor_up(buffer);
-                return;
-            }
-            if (seq2 == 'B') {
-                SelectionService::clear(hl);
-                move_cursor_down(buffer);
-                return;
-            }
-            if (seq2 == 'C') {
-                SelectionService::clear(hl);
-                move_cursor_right(buffer);
-                return;
-            }
-            if (seq2 == 'D') {
-                SelectionService::clear(hl);
-                move_cursor_left(buffer);
-                return;
-            }
+//             // --- STANDARD ARROWS (Clear selection, then move) ---
+//             if (seq2 == 'A') {
+//                 SelectionService::clear(hl);
+//                 move_cursor_up(buffer);
+//                 return;
+//             }
+//             if (seq2 == 'B') {
+//                 SelectionService::clear(hl);
+//                 move_cursor_down(buffer);
+//                 return;
+//             }
+//             if (seq2 == 'C') {
+//                 SelectionService::clear(hl);
+//                 move_cursor_right(buffer);
+//                 return;
+//             }
+//             if (seq2 == 'D') {
+//                 SelectionService::clear(hl);
+//                 move_cursor_left(buffer);
+//                 return;
+//             }
 
-            // --- SHIFT + ARROWS (Selection Logic) ---
-            if (seq2 == '1') {
-                char semicolon, mod, dir;
-                if (read(STDIN_FILENO, &semicolon, 1) != 1) return;
-                if (read(STDIN_FILENO, &mod, 1) != 1) return;
-                if (read(STDIN_FILENO, &dir, 1) != 1) return;
+//             // --- SHIFT + ARROWS (Selection Logic) ---
+//             if (seq2 == '1') {
+//                 char semicolon, mod, dir;
+//                 if (read(STDIN_FILENO, &semicolon, 1) != 1) return;
+//                 if (read(STDIN_FILENO, &mod, 1) != 1) return;
+//                 if (read(STDIN_FILENO, &dir, 1) != 1) return;
 
-                if (mod == '2') {
-                    // 1. Start selection if needed
-                    if (!hl.active) {
-                        SelectionService::start(hl, buffer);
-                    }
+//                 if (mod == '2') {
+//                     // 1. Start selection if needed
+//                     if (!hl.active) {
+//                         SelectionService::start(hl, buffer);
+//                     }
 
-                    // 2. Move Cursor & Update Endpoint
-                    if (dir == 'A') { 
-                        move_cursor_up(buffer);    
-                        SelectionService::update_endpoint(hl, buffer); 
-                        return; 
-                    }
-                    if (dir == 'B') { 
-                        move_cursor_down(buffer);  
-                        SelectionService::update_endpoint(hl, buffer); 
-                        return; 
-                    }
-                    if (dir == 'C') { 
-                        move_cursor_right(buffer); 
-                        SelectionService::update_endpoint(hl, buffer); 
-                        return; 
-                    }
-                    if (dir == 'D') { 
-                        move_cursor_left(buffer);  
-                        SelectionService::update_endpoint(hl, buffer); 
-                        return; 
-                    }
-                }
+//                     // 2. Move Cursor & Update Endpoint
+//                     if (dir == 'A') { 
+//                         move_cursor_up(buffer);    
+//                         SelectionService::update_endpoint(hl, buffer); 
+//                         return; 
+//                     }
+//                     if (dir == 'B') { 
+//                         move_cursor_down(buffer);  
+//                         SelectionService::update_endpoint(hl, buffer); 
+//                         return; 
+//                     }
+//                     if (dir == 'C') { 
+//                         move_cursor_right(buffer); 
+//                         SelectionService::update_endpoint(hl, buffer); 
+//                         return; 
+//                     }
+//                     if (dir == 'D') { 
+//                         move_cursor_left(buffer);  
+//                         SelectionService::update_endpoint(hl, buffer); 
+//                         return; 
+//                     }
+//                 }
 
-                SelectionService::clear(hl);
-                return;
-            }
-        }
+//                 SelectionService::clear(hl);
+//                 return;
+//             }
+//         }
 
-        SelectionService::clear(hl);
-        return;
-    }
+//         SelectionService::clear(hl);
+//         return;
+//     }
 
-    if (c == 127 || c == '\b') {
-        if (buffer.gap_start > 0 && !hl.active) {
-            buffer.gap_start--;
-        }
-        return;
-    }
+//     if (c == 127 || c == '\b') {
+//         if (buffer.gap_start > 0 && !hl.active) {
+//             buffer.gap_start--;
+//         }
+//         return;
+//     }
 
-    // CTRL+Q
-    if (c == 17) {
-        save_file(buffer, filename);
-        exit(0);
-    }
+//     // CTRL+Q
+//     if (c == 17) {
+//         save_file(buffer, filename);
+//         exit(0);
+//     }
 
-    // CTRL+C
-    if (c == 3){
-        if(hl.active){
-            string out;
-            // You can keep this manual loop or move it to SelectionService later
-            for (int i = hl.start; i < hl.end; i++) {
-                if (i >= buffer.gap_start && i < buffer.gap_end) continue;
-                out.push_back(buffer.data[i]);
-            }
-            clipboard = out;
-        }
-        return;
-    }
+//     // CTRL+C
+//     if (c == 3){
+//         if(hl.active){
+//             string out;
+//             // You can keep this manual loop or move it to SelectionService later
+//             for (int i = hl.start; i < hl.end; i++) {
+//                 if (i >= buffer.gap_start && i < buffer.gap_end) continue;
+//                 out.push_back(buffer.data[i]);
+//             }
+//             clipboard = out;
+//         }
+//         return;
+//     }
 
-    // CTRL+V
-    if (c == 22){
-        for (char c : clipboard){
-            insert_char(buffer, c);
-        }
-        return;
-    }
+//     // CTRL+V
+//     if (c == 22){
+//         for (char c : clipboard){
+//             insert_char(buffer, c);
+//         }
+//         return;
+//     }
 
-    insert_char(buffer, c);
-}
-
+//     insert_char(buffer, c);
+// }
 }

@@ -72,18 +72,42 @@ void Editor::process_input() {
             exit(0);
 
         case Key::Copy:
-            // Logic to copy selection to clipboard
-            break;
+            if (highligter.active) {
+                // 1. Extract the text like before
+                string out;
+                int start = std::min(highligter.start, highligter.end);
+                int end   = std::max(highligter.start, highligter.end);
 
-        case Key::Paste:
-            for (char c : clipboard) BufferService::insert_char(gap_buffer, c);
+                for (int i = start; i < end; i++) {
+                    if (i >= gap_buffer.gap_start && i < gap_buffer.gap_end) continue;
+                    out.push_back(gap_buffer.data[i]);
+                }
+                
+                // 2. SEND TO OS
+                ClipboardService::copy(out);
+            }
             break;
-            
+        case Key::Paste:
+            { // Scope for variables
+                // 1. GET FROM OS
+                std::string system_text = ClipboardService::paste();
+
+                // 2. Insert into buffer
+                for (char c : system_text) {
+                    // Filter out weird characters if needed
+                    if (c == '\r') continue; 
+                    BufferService::insert_char(gap_buffer, c);
+                }
+                
+                SelectionService::clear(highligter);
+            }
+            break;
         default: break;
     }
 
     // --- POST-MOVE UPDATE ---
     if (e.shift_held) {
         SelectionService::update_endpoint(highligter, gap_buffer);
+        
     }
 }

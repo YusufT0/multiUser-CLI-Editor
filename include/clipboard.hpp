@@ -1,4 +1,10 @@
 #pragma once
 #include <string>
 
-extern std::string clipboard;
+namespace ClipboardService {
+    // Send text to the OS clipboard
+    void copy(const std::string& text);
+
+    // Get text from the OS clipboard
+    std::string paste();
+}

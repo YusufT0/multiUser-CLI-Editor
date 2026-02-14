@@ -3,31 +3,40 @@
 
 using namespace std;
 namespace ViewService{
-    
-    CursorPos get_cursor_screen_pos(const GapBuffer& buffer) {
-    int row = 0;
-    int col = 0;
+    // CursorPos get_cursor_screen_pos(const GapBuffer& buffer) {
+    // int row = 0;
+    // int col = 0;
 
-    for (size_t i = 0; i < buffer.gap_start; i++) {
-        if (buffer.data[i] == '\n') {
-            row++;
-            col = 0;
-        } 
-        else if (buffer.data[i] == '\t'){
-            col = (col / 8 + 1) * 8; // Tab logic
-        }
-        else {
-            col++;
-        }
-    }
-    return {row, col};}
+    // for (size_t i = 0; i < buffer.gap_start; i++) {
+    //     if (buffer.data[i] == '\n') {
+    //         row++;
+    //         col = 0;
+    //     } 
+    //     else if (buffer.data[i] == '\t'){
+    //         col = (col / 8 + 1) * 8; // Tab logic
+    //     }
+    //     else {
+    //         col++;
+    //     }
+    // }
+    // return {row, col};}
 
     void print_buffer(const GapBuffer &buffer, const Highlight &hl, bool debug_mode) {
-        // 1. Prepare the memory buffer (prevents flickering)
+        
         std::string frame;
+        int start_row = 0;
+        int cursor_row_abs = 0; // Absolute row in the file
+        
+        
+        for (size_t i = 0; i < buffer.gap_start; i++) {
+            if (buffer.data[i] == '\n') cursor_row_abs++;
+        }
+        if (cursor_row_abs >= TER_END) {
+            start_row = cursor_row_abs - TER_END + 1;
+        }
+        
         frame.reserve(buffer.data.size() + 256); // Pre-allocate memory
 
-        // 2. Variables for tracking position
         int row = 0;
         int col = 0;
         int cursor_r = 0;
@@ -37,16 +46,16 @@ namespace ViewService{
         int sel_start = hl.active ? std::min(hl.start, hl.end) : -1;
         int sel_end   = hl.active ? std::max(hl.start, hl.end) : -1;
 
-        // 3. Move terminal cursor to top-leftt (Do NOT clear screen yet)
+        // 3. Move terminal cursor to top-left (Do NOT clear screen yet)
         frame += "\033[H"; 
 
-        // 4. Single Pass Loop: Build Frame AND Find Cursor
+        // Build Frame AND Find Cursor
         for (size_t i = 0; i < buffer.data.size(); i++) {
             
             // --- CURSOR TRACKING ---
             // If we are at the gap_start, this is where the cursor belongs!
             if (i == buffer.gap_start) {
-                cursor_r = row;
+                cursor_r = row - start_row;
                 cursor_c = col;
             }
 
@@ -69,32 +78,43 @@ namespace ViewService{
 
             // --- DRAW CHARACTER ---
             char c = buffer.data[i];
-            frame += c;
-
-            // --- POSITION TRACKING ---
+            bool visible = (row >= start_row) && (row < start_row + TER_END);
+            
+            if (visible) {
+                 if (is_highlighted) frame += "\033[7m";
+                 
+                 // Handle Newline clearing locally
+                 if (c == '\n') frame += "\033[K"; 
+                 
+                 frame += c;
+                 
+                 if (is_highlighted) frame += "\033[0m";
+            }
+            
             if (c == '\n') {
                 row++;
                 col = 0;
             } else if (c == '\t') {
-                // If you want visual tabs, you need to append spaces to 'frame' here
-                // For now, we just update the column counter logic
-                int spaces = 8 - (col % 8);
-                col += spaces;
+                col += (8 - (col % 8));
             } else {
                 col++;
             }
-
-            if (is_highlighted) frame += "\033[0m";
+            
+            // Optimization: If we went past the bottom of the screen, stop.
+            // (But only if we already found the cursor!)
+            if (row >= start_row + TER_END && i > buffer.gap_start) {
+                break; 
+            }   
         }
 
-        // 5. Clear everything *after* our text (Cleaner than clearing the whole screen)
+        // Clear everything
         frame += "\033[0J";
 
-        // 6. Append the cursor move command
-        // We use the coordinates we found during the loop!
+        // Cursor movement
         frame += "\033[" + to_string(cursor_r + 1) + ";" + to_string(cursor_c + 1) + "H";
 
-        // 7. SINGLE OUTPUT CALL (Very Fast)
+        // OUTPUT CALL
         cout << frame << flush;
     }
+    
 }
