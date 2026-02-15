@@ -18,5 +18,6 @@ It is a basic text editor for now. It has the basic features that every text edi
 
 # Future
 1. Going to fix the things that are in restrictions.
-2. Going to add tree-sitter to make this a proper looking text editor.
-3. This project at first planned as a multiple user editor. It has a long way to go.
+2. I really need to write tests.
+3. Going to add tree-sitter to make this a proper looking text editor.
+4. This project at first planned as a multiple user editor. It has a long way to go.
