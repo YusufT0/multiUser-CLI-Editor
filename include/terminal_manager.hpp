@@ -16,6 +16,7 @@ namespace TerminalManager{
         Key key;
         char value;      // Only used if key == Key::Char
         bool shift_held; // True if Shift was held (for selection)
+        bool ctrl_held;
     };
     InputEvent read_input();
 

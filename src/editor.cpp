@@ -50,11 +50,22 @@ void Editor::process_input() {
         case Key::Down:  
             BufferService::move_cursor_down(gap_buffer);  
             break;
-        case Key::Left:  
-            BufferService::move_cursor_left(gap_buffer);  
+        case Key::Left:
+            if(e.ctrl_held){
+                BufferService::move_word_left(gap_buffer);
+            }
+            else{
+                BufferService::move_cursor_left(gap_buffer);
+            }
             break;
-        case Key::Right: 
-            BufferService::move_cursor_right(gap_buffer); 
+        case Key::Right:
+            if(e.ctrl_held){
+                BufferService::move_word_right(gap_buffer);
+                }
+            else{
+                BufferService::move_cursor_right(gap_buffer); 
+            
+            }     
             break;
             
         case Key::Backspace:
@@ -88,11 +99,9 @@ void Editor::process_input() {
             }
             break;
         case Key::Paste:
-            { // Scope for variables
-                // 1. GET FROM OS
+            {
                 std::string system_text = ClipboardService::paste();
 
-                // 2. Insert into buffer
                 for (char c : system_text) {
                     // Filter out weird characters if needed
                     if (c == '\r') continue; 

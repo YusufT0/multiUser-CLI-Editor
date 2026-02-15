@@ -6,7 +6,9 @@ namespace BufferService{
     CursorPos get_cursor_pos(const GapBuffer&);
     Highlight create_highlight();
     void move_cursor_left(GapBuffer&);
+    void move_word_left(GapBuffer&);
     void move_cursor_right(GapBuffer&);
+    void move_word_right(GapBuffer&);
     void move_cursor_up(GapBuffer&);
     void move_cursor_down(GapBuffer&);
     void grow_gap(GapBuffer &buffer, size_t amount = 8);

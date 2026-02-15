@@ -26,6 +26,23 @@ void move_cursor_left(GapBuffer &b) {
     b.data[b.gap_end] = b.data[b.gap_start];
 }
 
+void move_word_left(GapBuffer &b){
+    if (b.gap_start == 0) return;
+    move_cursor_left(b);
+    while (b.gap_start > 0 && b.data[b.gap_start - 1] != ' '){
+        move_cursor_left(b);
+    }
+}
+
+void move_word_right(GapBuffer &b){
+    
+    if (b.gap_end == b.data.size()) return;
+    move_cursor_right(b);
+    while (b.gap_end < b.data.size() && b.data[b.gap_end] != ' ') {
+        move_cursor_right(b);
+    }
+}
+
 void move_cursor_right(GapBuffer &b) {
     if (b.gap_end == b.data.size()) return;
 

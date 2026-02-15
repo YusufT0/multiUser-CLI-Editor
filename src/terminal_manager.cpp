@@ -24,7 +24,6 @@ namespace TerminalManager
         char c;
         if (read(STDIN_FILENO, &c, 1) != 1) return {Key::None};
 
-        // 1. Handle Regular Characters
         if (c == 127 || c == '\b') return {Key::Backspace};
         if (c == 13 || c == '\n')  return {Key::Enter, '\n'};
         if (c == 17) return {Key::Quit};  // Ctrl+Q
@@ -46,24 +45,39 @@ namespace TerminalManager
                 if (seq[1] == 'C') return {Key::Right};
                 if (seq[1] == 'D') return {Key::Left};
 
-                // Shift + Arrows (1;2A)
                 if (seq[1] == '1') {
-                    char dummy;
-                    read(STDIN_FILENO, &dummy, 1); // ;
-                    read(STDIN_FILENO, &dummy, 1); // 2
+                    char sep; 
+                    char mod;
                     char dir;
-                    read(STDIN_FILENO, &dir, 1);   // Direction
 
-                    if (dir == 'A') return {Key::Up, 0, true};
-                    if (dir == 'B') return {Key::Down, 0, true};
-                    if (dir == 'C') return {Key::Right, 0, true};
-                    if (dir == 'D') return {Key::Left, 0, true};
+                    // Read the separator (;)
+                    if (read(STDIN_FILENO, &sep, 1) != 1) return {Key::Escape};
+                    
+                    // Read the modifier ('2' = Shift, '5' = Ctrl, '6' = Ctrl+Shift)
+                    if (read(STDIN_FILENO, &mod, 1) != 1) return {Key::Escape};
+                    
+                    // Read the direction (A, B, C, D)
+                    if (read(STDIN_FILENO, &dir, 1) != 1) return {Key::Escape};
+
+                    // Determine flags
+                    bool is_shift = (mod == '2' || mod == '6');
+                    bool is_ctrl  = (mod == '5' || mod == '6');
+
+                    // Map direction
+                    Key k = Key::None;
+                    if (dir == 'A') k = Key::Up;
+                    if (dir == 'B') k = Key::Down;
+                    if (dir == 'C') k = Key::Right;
+                    if (dir == 'D') k = Key::Left;
+
+                    // Return the event with BOTH flags set correctly
+                    return {k, 0, is_shift, is_ctrl};
                 }
             }
             return {Key::Escape};
         }
 
-        // 3. Skip UTF-8 (Your logic)
+        // 3. Skip UTF-8
         if ((unsigned char)c >= 0xC2) {
             char throwaway;
             read(STDIN_FILENO, &throwaway, 1);
