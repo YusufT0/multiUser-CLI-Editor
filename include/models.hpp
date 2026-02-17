@@ -6,7 +6,7 @@ struct CursorPos { int row; int col; };
 
 struct GapBuffer {
     std::vector<char> data;
-    int gap_start, gap_end;
+    std::size_t gap_start, gap_end;
 };
 
 struct Highlight {

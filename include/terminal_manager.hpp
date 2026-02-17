@@ -13,10 +13,10 @@ namespace TerminalManager{
         Copy, Paste, Quit, Save
     };
     struct InputEvent {
-        Key key;
-        char value;      // Only used if key == Key::Char
-        bool shift_held; // True if Shift was held (for selection)
-        bool ctrl_held;
+        Key key = Key::None;
+        char value = '\0';
+        bool shift_held = false;
+        bool ctrl_held = false;
     };
     InputEvent read_input();
 

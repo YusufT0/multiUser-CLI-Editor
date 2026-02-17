@@ -8,8 +8,8 @@ GapBuffer load_file(const std::string& path) {
 
     std::ifstream file(path);
     if (!file.is_open()) {
-        std::ofstream create(path);   // create empty file
-        return b;                     // start with empty buffer
+        std::ofstream create(path);   
+        return b;                     
     }
 
     std::vector<char> temp;
@@ -32,8 +32,8 @@ GapBuffer load_file(const std::string& path) {
 void save_file(const GapBuffer &b, const string &path) {
     ofstream file(path);
     if (!file.is_open()) return;
-    for (int i = 0; i < b.gap_start; i++)
+    for (size_t i = 0; i < b.gap_start; i++)
     file << b.data[i];
-    for (int i = b.gap_end; i < b.data.size(); i++)
+    for (size_t i = b.gap_end; i < b.data.size(); i++)
     file << b.data[i];
 }

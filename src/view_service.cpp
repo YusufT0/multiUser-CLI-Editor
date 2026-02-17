@@ -43,8 +43,8 @@ namespace ViewService{
         int cursor_c = 0;
         
         // Selection bounds (normalized)
-        int sel_start = hl.active ? std::min(hl.start, hl.end) : -1;
-        int sel_end   = hl.active ? std::max(hl.start, hl.end) : -1;
+        size_t sel_start = hl.active ? std::min(hl.start, hl.end) : -1;
+        size_t sel_end   = hl.active ? std::max(hl.start, hl.end) : -1;
 
         // 3. Move terminal cursor to top-left (Do NOT clear screen yet)
         frame += "\033[H"; 

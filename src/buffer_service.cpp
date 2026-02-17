@@ -53,20 +53,22 @@ void move_cursor_right(GapBuffer &b) {
 
 static int get_col_on_line(const GapBuffer &b) {
     int col = 0;
-    // Scan backwards from gap_start until we hit a newline or start of file
-    for (int i = b.gap_start - 1; i >= 0; i--) {
+    if (b.gap_start == 0) return 0; // Already at the start of the file
+
+    // Start at gap_start - 1 and go down to 0
+    size_t i = b.gap_start;
+    while (i > 0) {
+        i--; // Move to the previous character
         if (b.data[i] == '\n') break;
         
-        // Handle tabs if you want perfect alignment, otherwise just col++
         if (b.data[i] == '\t') 
-                col = (col / 8 + 1) * 8; 
+            col = (col / 8 + 1) * 8; 
         else 
-                col++;
+            col++;
     }
     return col;
 }
 
-// Now this function is pure logic. No "CursorPos" struct needed.
 void move_cursor_up(GapBuffer &b) {
     if (b.gap_start == 0) return;
 

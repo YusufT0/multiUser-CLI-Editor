@@ -30,19 +30,17 @@ void Editor::process_input() {
     InputEvent e = read_input();
     if (e.key == Key::None) return;
 
-    // --- GLOBAL SELECTION LOGIC ---
     // If Shift is held, ensure we are in selection mode.
     if (e.shift_held && !highligter.active) {
         SelectionService::start(highligter, gap_buffer);
     }
+    
     // If Shift is NOT held and we move, clear selection.
-    // (Exceptions: Char insertion and Backspace handle their own logic)
     if (!e.shift_held && e.key != Key::Char && e.key != Key::Backspace && 
         e.key != Key::Copy && e.key != Key::Paste) {
         SelectionService::clear(highligter);
     }
 
-    // --- COMMAND DISPATCH ---
     switch (e.key) {
         case Key::Up:    
             BufferService::move_cursor_up(gap_buffer);    
@@ -84,17 +82,16 @@ void Editor::process_input() {
 
         case Key::Copy:
             if (highligter.active) {
-                // 1. Extract the text like before
+    
                 string out;
-                int start = std::min(highligter.start, highligter.end);
-                int end   = std::max(highligter.start, highligter.end);
+                size_t start = std::min(highligter.start, highligter.end);
+                size_t end   = std::max(highligter.start, highligter.end);
 
-                for (int i = start; i < end; i++) {
+                for (size_t i = start; i < end; i++) {
                     if (i >= gap_buffer.gap_start && i < gap_buffer.gap_end) continue;
                     out.push_back(gap_buffer.data[i]);
                 }
                 
-                // 2. SEND TO OS
                 ClipboardService::copy(out);
             }
             break;
@@ -103,7 +100,7 @@ void Editor::process_input() {
                 std::string system_text = ClipboardService::paste();
 
                 for (char c : system_text) {
-                    // Filter out weird characters if needed
+    
                     if (c == '\r') continue; 
                     BufferService::insert_char(gap_buffer, c);
                 }
@@ -114,7 +111,6 @@ void Editor::process_input() {
         default: break;
     }
 
-    // --- POST-MOVE UPDATE ---
     if (e.shift_held) {
         SelectionService::update_endpoint(highligter, gap_buffer);
         

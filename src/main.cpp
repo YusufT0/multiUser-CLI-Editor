@@ -10,7 +10,7 @@ int main(int argc, char**argv){
         cout << "Usage: ./editor <filename>\n";
         return 1;
     }
-    CursorPos curp = {0, 0};
+    
     try {
         Editor editor(argv[1]);
         editor.start_writing();
