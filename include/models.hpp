@@ -11,6 +11,6 @@ struct GapBuffer {
 
 struct Highlight {
     bool active = false;
-    int start = 0;   // where selection started
-    int end = 0;   // current position (same as your gap_start)
+    size_t start = 0;   // where selection started
+    size_t end = 0;   // current position (same as your gap_start)
 };

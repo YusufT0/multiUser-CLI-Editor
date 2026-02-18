@@ -1,6 +1,5 @@
 #pragma once
 #include "models.hpp"
-
 namespace SelectionService 
 {
     void clear(Highlight &hl);

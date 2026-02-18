@@ -6,13 +6,13 @@
 #include <iostream>
 using namespace std;
 int main(int argc, char**argv){
-    if (argc < 2) {
-        cout << "Usage: ./editor <filename>\n";
-        return 1;
-    }
-    
+    // if (argc < 2) {
+    //     cout << "Usage: ./editor <filename>\n";
+    //     return 1;
+    // }
+    string file_name = "./test.txt";
     try {
-        Editor editor(argv[1]);
+        Editor editor(file_name);
         editor.start_writing();
     } catch (const std::runtime_error& e) {
         cerr << e.what() << '\n';

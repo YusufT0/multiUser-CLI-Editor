@@ -26,6 +26,7 @@ namespace ViewService{
         std::string frame;
         int start_row = 0;
         int cursor_row_abs = 0; // Absolute row in the file
+        size_t gap_size = buffer.gap_end - buffer.gap_start;
         
         
         for (size_t i = 0; i < buffer.gap_start; i++) {
@@ -43,8 +44,13 @@ namespace ViewService{
         int cursor_c = 0;
         
         // Selection bounds (normalized)
-        size_t sel_start = hl.active ? std::min(hl.start, hl.end) : -1;
-        size_t sel_end   = hl.active ? std::max(hl.start, hl.end) : -1;
+        std::size_t sel_start = 0;
+        std::size_t sel_end = 0;
+
+        if (hl.active) {
+            sel_start = std::min(hl.start, hl.end);
+            sel_end   = std::max(hl.start, hl.end);
+        }
 
         // 3. Move terminal cursor to top-left (Do NOT clear screen yet)
         frame += "\033[H"; 
@@ -65,6 +71,9 @@ namespace ViewService{
                 continue;
             }
             
+            size_t logical_i = (i < buffer.gap_start) ? i : (i - gap_size);
+
+            bool is_highlighted = hl.active && (logical_i >= sel_start && logical_i < sel_end);
             // --- DEBUG VISUALIZATION ---
             if (debug_mode) {
                  if (i == buffer.gap_start) frame += "<";
@@ -73,22 +82,20 @@ namespace ViewService{
             }
 
             // --- HIGHLIGHTING ---
-            bool is_highlighted = hl.active && (i >= sel_start && i < sel_end);
-            if (is_highlighted) frame += "\033[7m";
+            
+            // if (is_highlighted) frame += "\033[7m";
 
             // --- DRAW CHARACTER ---
             char c = buffer.data[i];
             bool visible = (row >= start_row) && (row < start_row + TER_END);
-            
+
             if (visible) {
-                 if (is_highlighted) frame += "\033[7m";
-                 
-                 // Handle Newline clearing locally
-                 if (c == '\n') frame += "\033[K"; 
-                 
-                 frame += c;
-                 
-                 if (is_highlighted) frame += "\033[0m";
+                if (is_highlighted) frame += "\033[7m"; // Start Highlight
+                
+                if (c == '\n') frame += "\033[K"; 
+                frame += c;
+                
+                if (is_highlighted) frame += "\033[0m"; // Reset Highlight
             }
             
             if (c == '\n') {

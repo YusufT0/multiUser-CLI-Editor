@@ -88,7 +88,7 @@ void Editor::process_input() {
                 size_t end   = std::max(highligter.start, highligter.end);
 
                 for (size_t i = start; i < end; i++) {
-                    if (i >= gap_buffer.gap_start && i < gap_buffer.gap_end) continue;
+                    // if (i >= gap_buffer.gap_start && i < gap_buffer.gap_end) continue;
                     out.push_back(gap_buffer.data[i]);
                 }
                 
