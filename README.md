@@ -9,12 +9,10 @@ It is a basic text editor for now. It has the basic features that every text edi
 6. Writing more than a spesific row count triggers scrolling.
 
 # Restrictions
-1. For now it is designed only for wayland machines. It wouldn't work on windows, mac or X11 setups.
-2. It will work properly only if you adjust your terminal to be length of 40 lines or more. If it is less cursor loses its mind.
-3. I am trying to figure out backwards shift still please be patient.
-4. CTRL+SHIFT combo is not working for some reason going to fix it.
-5. Printing logic is AWFUL. It prints 40 rows instantly every time. It is NOT optimal.
-6. I think I have multiple leaks. Not sure tho.
+1. It will work properly only if you adjust your terminal to be length of 40 lines or more. If it is less cursor loses its mind.
+2. CTRL+SHIFT combo is not working for some reason going to fix it.
+3. Printing logic is AWFUL. It prints 40 rows instantly every time. It is NOT optimal.
+4. I think I have multiple leaks. Not sure tho.
 
 # Future
 1. Going to fix the things that are in restrictions.
