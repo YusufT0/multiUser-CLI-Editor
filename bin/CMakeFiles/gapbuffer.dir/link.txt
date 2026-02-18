@@ -1,2 +1,0 @@
-/usr/bin/ar qc libgapbuffer.a CMakeFiles/gapbuffer.dir/src/buffer_service.cpp.o CMakeFiles/gapbuffer.dir/src/file_io.cpp.o CMakeFiles/gapbuffer.dir/src/terminal_manager.cpp.o CMakeFiles/gapbuffer.dir/src/clipboard.cpp.o CMakeFiles/gapbuffer.dir/src/editor.cpp.o CMakeFiles/gapbuffer.dir/src/view_service.cpp.o CMakeFiles/gapbuffer.dir/src/selection_service.cpp.o
-/usr/bin/ranlib libgapbuffer.a
