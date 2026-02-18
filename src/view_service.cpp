@@ -28,7 +28,8 @@ namespace ViewService{
         int cursor_row_abs = 0; // Absolute row in the file
         size_t gap_size = buffer.gap_end - buffer.gap_start;
         
-        
+        // This is needed for scrolling screen.
+        // With the absolute position of cursor we can scroll without losing cursor.
         for (size_t i = 0; i < buffer.gap_start; i++) {
             if (buffer.data[i] == '\n') cursor_row_abs++;
         }
@@ -36,7 +37,7 @@ namespace ViewService{
             start_row = cursor_row_abs - TER_END + 1;
         }
         
-        frame.reserve(buffer.data.size() + 256); // Pre-allocate memory
+        frame.reserve(buffer.data.size() + 256); 
 
         int row = 0;
         int col = 0;
@@ -52,28 +53,27 @@ namespace ViewService{
             sel_end   = std::max(hl.start, hl.end);
         }
 
-        // 3. Move terminal cursor to top-left (Do NOT clear screen yet)
         frame += "\033[H"; 
 
         // Build Frame AND Find Cursor
         for (size_t i = 0; i < buffer.data.size(); i++) {
             
             // --- CURSOR TRACKING ---
-            // If we are at the gap_start, this is where the cursor belongs!
             if (i == buffer.gap_start) {
                 cursor_r = row - start_row;
                 cursor_c = col;
             }
 
             // --- GAP SKIPPING ---
-            // If inside gap (and not debugging), skip drawing
             if (!debug_mode && i >= buffer.gap_start && i < buffer.gap_end) {
                 continue;
             }
             
+            // --- HIGHLIGHTING ---
             size_t logical_i = (i < buffer.gap_start) ? i : (i - gap_size);
 
             bool is_highlighted = hl.active && (logical_i >= sel_start && logical_i < sel_end);
+            
             // --- DEBUG VISUALIZATION ---
             if (debug_mode) {
                  if (i == buffer.gap_start) frame += "<";
@@ -81,9 +81,6 @@ namespace ViewService{
                  if (i == buffer.gap_end) frame += ">";
             }
 
-            // --- HIGHLIGHTING ---
-            
-            // if (is_highlighted) frame += "\033[7m";
 
             // --- DRAW CHARACTER ---
             char c = buffer.data[i];
@@ -107,8 +104,6 @@ namespace ViewService{
                 col++;
             }
             
-            // Optimization: If we went past the bottom of the screen, stop.
-            // (But only if we already found the cursor!)
             if (row >= start_row + TER_END && i > buffer.gap_start) {
                 break; 
             }   

@@ -53,12 +53,11 @@ void move_cursor_right(GapBuffer &b) {
 
 static int get_col_on_line(const GapBuffer &b) {
     int col = 0;
-    if (b.gap_start == 0) return 0; // Already at the start of the file
+    if (b.gap_start == 0) return 0;
 
-    // Start at gap_start - 1 and go down to 0
     size_t i = b.gap_start;
     while (i > 0) {
-        i--; // Move to the previous character
+        i--; 
         if (b.data[i] == '\n') break;
         
         if (b.data[i] == '\t') 
@@ -72,23 +71,18 @@ static int get_col_on_line(const GapBuffer &b) {
 void move_cursor_up(GapBuffer &b) {
     if (b.gap_start == 0) return;
 
-    // 1. Calculate target column locally
     int target_col = get_col_on_line(b); 
 
-    // 2. Move to start of current line (Logic from your loop, but cleaner)
     while (b.gap_start > 0 && b.data[b.gap_start - 1] != '\n') {
         move_cursor_left(b);
     }
     
-    // 3. Move past the newline to go to the previous line
     if (b.gap_start > 0) move_cursor_left(b);
 
-    // 4. Move to start of THAT previous line
     while (b.gap_start > 0 && b.data[b.gap_start - 1] != '\n') {
         move_cursor_left(b);
     }
 
-    // 5. Move forward to the target column
     int current_col = 0;
     while (current_col < target_col && b.gap_end < b.data.size() && b.data[b.gap_end] != '\n') {
         move_cursor_right(b);
@@ -99,16 +93,13 @@ void move_cursor_up(GapBuffer &b) {
 void move_cursor_down(GapBuffer &b) {
     int target_col = get_col_on_line(b);
 
-    // 1. Move to end of current line
     while (b.gap_end < b.data.size() && b.data[b.gap_end] != '\n') {
         move_cursor_right(b);
     }
 
-    // 2. Jump over the newline
     if (b.gap_end < b.data.size()) move_cursor_right(b);
     else return; // End of file
 
-    // 3. Move forward to target column on the new line
     int current_col = 0;
     while (current_col < target_col && b.gap_end < b.data.size() && b.data[b.gap_end] != '\n') {
         move_cursor_right(b);

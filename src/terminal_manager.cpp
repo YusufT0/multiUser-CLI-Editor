@@ -6,11 +6,9 @@
     #include <windows.h>
     #include <io.h>
     
-    // Windows Global Console State
     static HANDLE hStdin;
     static DWORD originalMode;
     
-    // Check if VT mode is supported (Windows 10 Anniversary Update or newer)
     #ifndef ENABLE_VIRTUAL_TERMINAL_INPUT
     #define ENABLE_VIRTUAL_TERMINAL_INPUT 0x0200
     #endif
@@ -51,25 +49,18 @@ namespace TerminalManager
 
             DWORD newMode = originalMode;
             
-            // Disable these to act like "Raw" mode
-            // ENABLE_ECHO_INPUT: Don't print keys as pressed
-            // ENABLE_LINE_INPUT: Read chars immediately, don't wait for Enter
-            // ENABLE_PROCESSED_INPUT: Pass Ctrl+C/V as raw characters (0x03, 0x16)
             newMode &= ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT);
             
-            // CRITICAL: Enable VT Input. 
-            // This makes arrows send "\x1b[A" instead of Windows scancodes.
             newMode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
 
             SetConsoleMode(hStdin, newMode);
     #else
-            // Linux & Mac Implementation
+            
             tcgetattr(STDIN_FILENO, &orig);
             struct termios raw = orig;
             
-            // Disable: ECHO, Canonical mode, Extended input, Signals (Ctrl+C/Z signals)
             raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
-            // Disable: Software flow control, CR-to-NL mapping
+            
             raw.c_iflag &= ~(IXON | ICRNL);
             
             tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
@@ -91,7 +82,6 @@ namespace TerminalManager
         if (c == 27) { // \x1b
             char seq[3];
             
-            // Try to read next char. If fail, it was just the Escape key.
             if (!read_byte(seq[0])) return {Key::Escape};
             
             if (seq[0] == '[') {
@@ -103,7 +93,7 @@ namespace TerminalManager
                 if (seq[1] == 'C') return {Key::Right};
                 if (seq[1] == 'D') return {Key::Left};
 
-                // Modifier sequences (Shift/Ctrl + Arrow) -> e.g., "1;2A"
+                // (Shift/Ctrl + Arrow)"
                 if (seq[1] == '1') {
                     char sep, mod, dir;
 
@@ -126,14 +116,13 @@ namespace TerminalManager
             return {Key::Escape};
         }
 
-        // 3. Skip UTF-8 Continuation bytes (if any)
+        // Skip UTF-8 Continuation
         if ((unsigned char)c >= 0xC2) {
             char throwaway;
-            read_byte(throwaway); // Consume the next byte blindly
+            read_byte(throwaway); 
             return {Key::None};
         }
 
-        // 4. Default: It's a character
         return {Key::Char, c};
     }
 }

@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/editor.dir/link.d CMakeFiles/editor.dir/src/main.cpp.o -o editor  libgapbuffer.a
