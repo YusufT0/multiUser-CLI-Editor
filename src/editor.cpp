@@ -11,7 +11,7 @@ using namespace std;
 void Editor::init(const std::string &p) {
   path = p;
   gap_buffer = load_file(path);
-  DEBUG_GAP = true;
+  DEBUG_GAP = false;
 }
 void Editor::start_writing() {
   TerminalManager::enableRawMode();

@@ -79,8 +79,8 @@ void move_cursor_up(GapBuffer &b) {
   int target_col = get_col_on_line(b);
 
   // Within same logical line: move up one visual segment
-  if (target_col >= ViewService::TER_END) {
-    for (int i = 0; i < ViewService::TER_END; i++) {
+  if (target_col >= ViewService::TER_END_X) {
+    for (int i = 0; i < ViewService::TER_END_X; i++) {
       if (b.gap_start == 0 || b.data[b.gap_start - 1] == '\n')
         break;
       move_cursor_left(b);
@@ -118,8 +118,8 @@ void move_cursor_down(GapBuffer &b) {
   }
 
   // Within same logical line: move down one visual segment
-  if (remaining >= ViewService::TER_END) {
-    for (int j = 0; j < ViewService::TER_END; j++)
+  if (remaining >= ViewService::TER_END_X) {
+    for (int j = 0; j < ViewService::TER_END_X; j++)
       move_cursor_right(b);
     return;
   }

@@ -13,12 +13,25 @@ void print_buffer(const GapBuffer &buffer, const Highlight &hl,
 
   // This is needed for scrolling screen.
   // With the absolute position of cursor we can scroll without losing cursor.
-  for (size_t i = 0; i < buffer.gap_start; i++) {
-    if (buffer.data[i] == '\n')
-      cursor_row_abs++;
+  {
+    int col = 0;
+    for (size_t i = 0; i < buffer.gap_start; i++) {
+      if (buffer.data[i] == '\n') {
+        cursor_row_abs++;
+        col = 0;
+      } else if (buffer.data[i] == '\t') {
+        col += (8 - (col % 8));
+      } else {
+        col++;
+      }
+      if (col >= TER_END_X) {
+        cursor_row_abs++;
+        col = 0;
+      }
+    }
   }
-  if (cursor_row_abs >= TER_END) {
-    start_row = cursor_row_abs - TER_END + 1;
+  if (cursor_row_abs >= TER_END_Y) {
+    start_row = cursor_row_abs - TER_END_Y + 1;
   }
 
   frame.reserve(buffer.data.size() + 256);
@@ -73,7 +86,7 @@ void print_buffer(const GapBuffer &buffer, const Highlight &hl,
 
     // --- DRAW CHARACTER ---
     char c = buffer.data[i];
-    bool visible = (row >= start_row) && (row < start_row + TER_END);
+    bool visible = (row >= start_row) && (row < start_row + TER_END_Y);
 
     if (visible) {
       if (is_highlighted)
@@ -96,15 +109,15 @@ void print_buffer(const GapBuffer &buffer, const Highlight &hl,
       col++;
     }
 
-    // Force wrap at TER_END columns
-    if (col >= TER_END && c != '\n') {
+    // Force wrap at TER_END_X columns
+    if (col >= TER_END_X && c != '\n') {
       if (visible)
         frame += "\033[K\n";
       row++;
       col = 0;
     }
 
-    if (row >= start_row + TER_END && i > buffer.gap_start) {
+    if (row >= start_row + TER_END_Y && i > buffer.gap_start) {
       break;
     }
   }
