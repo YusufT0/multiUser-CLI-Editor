@@ -1,21 +1,31 @@
+// This is a Singleton Class that is going to initialize once for every user.
+
 #ifndef EDITOR_HPP
 #define EDITOR_HPP
-
-#include <string>
-#include "buffer_service.hpp"
 #include "models.hpp"
-
+#include <string>
 class Editor {
 private:
-    std::string path;
-    GapBuffer gap_buffer;
-    Highlight highligter;
-    bool DEBUG_GAP;
-    void process_input();
+  std::string path;
+  GapBuffer gap_buffer;
+  Highlight highligter;
+  bool DEBUG_GAP;
+  Editor() : DEBUG_GAP(false) {}
+  ~Editor() = default;
+  void process_input();
 
 public:
-    Editor(const std::string& p);
-    void start_writing();
+  static Editor &get_instance() {
+    static Editor instance;
+    return instance;
+  }
+
+  Editor(const Editor &) = delete; // We do not want copy constructors. Do not
+                                   // create a new editor by copying an old one.
+  Editor &operator=(const Editor &) =
+      delete; // Do not overwrite an existing editor with an old one.
+  void init(const std::string &p);
+  void start_writing();
 };
 
 #endif

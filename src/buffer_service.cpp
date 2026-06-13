@@ -1,128 +1,163 @@
 #include "buffer_service.hpp"
 #include "models.hpp"
-#include "file_io.hpp"
-#include "clipboard.hpp"
-#include "selection_service.hpp"
-#include <iostream>
-#include <unistd.h>
+#include "view_service.hpp"
+#include <cstddef>
 #include <stdlib.h>
+#include <unistd.h>
 
 using namespace std;
 
-namespace BufferService{
+namespace BufferService {
 
-    GapBuffer create_gap_buffer(){
-    GapBuffer buffer;
-    buffer.data.resize(1024);
-    buffer.gap_start = 0;
-    buffer.gap_end = 1024;
-    return buffer;
+GapBuffer create_gap_buffer() {
+  GapBuffer buffer;
+  buffer.data.resize(1024);
+  buffer.gap_start = 0;
+  buffer.gap_end = 1024;
+  return buffer;
 };
 void move_cursor_left(GapBuffer &b) {
-    if (b.gap_start == 0) return;
+  if (b.gap_start == 0)
+    return;
 
-    b.gap_start--;
-    b.gap_end--;
-    b.data[b.gap_end] = b.data[b.gap_start];
+  b.gap_start--;
+  b.gap_end--;
+  b.data[b.gap_end] = b.data[b.gap_start];
 }
 
-void move_word_left(GapBuffer &b){
-    if (b.gap_start == 0) return;
+void move_word_left(GapBuffer &b) {
+  if (b.gap_start == 0)
+    return;
+  move_cursor_left(b);
+  while (b.gap_start > 0 && b.data[b.gap_start - 1] != ' ') {
     move_cursor_left(b);
-    while (b.gap_start > 0 && b.data[b.gap_start - 1] != ' '){
-        move_cursor_left(b);
-    }
+  }
 }
 
-void move_word_right(GapBuffer &b){
-    
-    if (b.gap_end == b.data.size()) return;
+void move_word_right(GapBuffer &b) {
+
+  if (b.gap_end == b.data.size())
+    return;
+  move_cursor_right(b);
+  while (b.gap_end < b.data.size() && b.data[b.gap_end] != ' ') {
     move_cursor_right(b);
-    while (b.gap_end < b.data.size() && b.data[b.gap_end] != ' ') {
-        move_cursor_right(b);
-    }
+  }
 }
 
 void move_cursor_right(GapBuffer &b) {
-    if (b.gap_end == b.data.size()) return;
+  if (b.gap_end == b.data.size())
+    return;
 
-    b.data[b.gap_start] = b.data[b.gap_end];
-    b.gap_start++;
-    b.gap_end++;
+  b.data[b.gap_start] = b.data[b.gap_end];
+  b.gap_start++;
+  b.gap_end++;
 }
 
 static int get_col_on_line(const GapBuffer &b) {
-    int col = 0;
-    if (b.gap_start == 0) return 0;
+  int col = 0;
+  if (b.gap_start == 0)
+    return 0;
 
-    size_t i = b.gap_start;
-    while (i > 0) {
-        i--; 
-        if (b.data[i] == '\n') break;
-        
-        if (b.data[i] == '\t') 
-            col = (col / 8 + 1) * 8; 
-        else 
-            col++;
-    }
-    return col;
+  size_t i = b.gap_start;
+  while (i > 0) {
+    i--;
+    if (b.data[i] == '\n')
+      break;
+
+    if (b.data[i] == '\t')
+      col = (col / 8 + 1) * 8;
+    else
+      col++;
+  }
+  return col;
 }
 
 void move_cursor_up(GapBuffer &b) {
-    if (b.gap_start == 0) return;
+  if (b.gap_start == 0)
+    return;
 
-    int target_col = get_col_on_line(b); 
+  int target_col = get_col_on_line(b);
 
-    while (b.gap_start > 0 && b.data[b.gap_start - 1] != '\n') {
-        move_cursor_left(b);
+  // Within same logical line: move up one visual segment
+  if (target_col >= ViewService::TER_END) {
+    for (int i = 0; i < ViewService::TER_END; i++) {
+      if (b.gap_start == 0 || b.data[b.gap_start - 1] == '\n')
+        break;
+      move_cursor_left(b);
     }
-    
-    if (b.gap_start > 0) move_cursor_left(b);
+    return;
+  }
 
-    while (b.gap_start > 0 && b.data[b.gap_start - 1] != '\n') {
-        move_cursor_left(b);
-    }
+  // Cross to previous logical line
+  while (b.gap_start > 0 && b.data[b.gap_start - 1] != '\n')
+    move_cursor_left(b);
 
-    int current_col = 0;
-    while (current_col < target_col && b.gap_end < b.data.size() && b.data[b.gap_end] != '\n') {
-        move_cursor_right(b);
-        current_col++; 
-    }
+  if (b.gap_start > 0)
+    move_cursor_left(b);
+
+  while (b.gap_start > 0 && b.data[b.gap_start - 1] != '\n')
+    move_cursor_left(b);
+
+  int current_col = 0;
+  while (current_col < target_col && b.gap_end < b.data.size() &&
+         b.data[b.gap_end] != '\n') {
+    move_cursor_right(b);
+    current_col++;
+  }
 }
 
 void move_cursor_down(GapBuffer &b) {
-    int target_col = get_col_on_line(b);
+  int target_col = get_col_on_line(b);
 
-    while (b.gap_end < b.data.size() && b.data[b.gap_end] != '\n') {
-        move_cursor_right(b);
-    }
+  // Count remaining chars on this line past the cursor
+  size_t remaining = 0;
+  size_t i = b.gap_end;
+  while (i < b.data.size() && b.data[i] != '\n') {
+    remaining++;
+    i++;
+  }
 
-    if (b.gap_end < b.data.size()) move_cursor_right(b);
-    else return; // End of file
+  // Within same logical line: move down one visual segment
+  if (remaining >= ViewService::TER_END) {
+    for (int j = 0; j < ViewService::TER_END; j++)
+      move_cursor_right(b);
+    return;
+  }
 
-    int current_col = 0;
-    while (current_col < target_col && b.gap_end < b.data.size() && b.data[b.gap_end] != '\n') {
-        move_cursor_right(b);
-        current_col++;
-    }
+  // Cross to next logical line
+  while (b.gap_end < b.data.size() && b.data[b.gap_end] != '\n')
+    move_cursor_right(b);
+
+  if (b.gap_end < b.data.size())
+    move_cursor_right(b);
+  else
+    return;
+
+  int current_col = 0;
+  while (current_col < target_col && b.gap_end < b.data.size() &&
+         b.data[b.gap_end] != '\n') {
+    move_cursor_right(b);
+    current_col++;
+  }
 }
 
 void grow_gap(GapBuffer &buffer, size_t amount) {
-    size_t old_size = buffer.data.size();
-    size_t gap_size = amount;
+  size_t old_size = buffer.data.size();
+  size_t gap_size = amount;
 
-    buffer.data.resize(old_size + gap_size);
+  buffer.data.resize(old_size + gap_size);
 
-    size_t right_len = old_size - buffer.gap_end;
+  size_t right_len = old_size - buffer.gap_end;
 
-    for (size_t i = right_len; i-- > 0; ) {
-        // cout << "Moving " << buffer.data[buffer.gap_end + i] << " from: " << buffer.gap_end + i << " to: " << buffer.gap_end + gap_size + i;
-        // cout << endl;
-        buffer.data[buffer.gap_end + gap_size + i] =
-            buffer.data[buffer.gap_end + i];
-    }
+  for (size_t i = right_len; i-- > 0;) {
+    // cout << "Moving " << buffer.data[buffer.gap_end + i] << " from: " <<
+    // buffer.gap_end + i << " to: " << buffer.gap_end + gap_size + i; cout <<
+    // endl;
+    buffer.data[buffer.gap_end + gap_size + i] =
+        buffer.data[buffer.gap_end + i];
+  }
 
-    buffer.gap_end += gap_size;
+  buffer.gap_end += gap_size;
 }
 
 // void print_buffer(const GapBuffer &buffer, Highlight &hl) {
@@ -162,21 +197,20 @@ void grow_gap(GapBuffer &buffer, size_t amount) {
 //     cout << "\033[" << pos.row+1 << ";" << pos.col+1 << "H" << flush;
 // }
 
+void insert_char(GapBuffer &buffer, char c) {
 
-void insert_char(GapBuffer &buffer, char c){
-    
-    if (buffer.gap_start == buffer.gap_end) {
-        grow_gap(buffer, 1024);
-    }
-    
-    if (c == '\n' || c == '\r') {
-        buffer.data[buffer.gap_start] = '\n';
-        buffer.gap_start++;
-        return;
-    }
+  if (buffer.gap_start == buffer.gap_end) {
+    grow_gap(buffer, 1024);
+  }
 
-    buffer.data[buffer.gap_start] = c;
+  if (c == '\n' || c == '\r') {
+    buffer.data[buffer.gap_start] = '\n';
     buffer.gap_start++;
+    return;
+  }
+
+  buffer.data[buffer.gap_start] = c;
+  buffer.gap_start++;
 }
 
 // void clear_highlight(Highlight &hl) {
@@ -211,11 +245,10 @@ void insert_char(GapBuffer &buffer, char c){
 //     hl.end = buffer.gap_start;
 // }
 
-
-
 // Ensure you have #include "selection_service.hpp" at the top of this file
 
-// void update_gap_buffer(GapBuffer &buffer, const std::string &filename, Highlight &hl) {
+// void update_gap_buffer(GapBuffer &buffer, const std::string &filename,
+// Highlight &hl) {
 //     char c;
 //     if (read(STDIN_FILENO, &c, 1) != 1) return;
 
@@ -224,7 +257,7 @@ void insert_char(GapBuffer &buffer, char c){
 //     if (uc >= 0xC2) {
 //         char throwaway;
 //         read(STDIN_FILENO, &throwaway, 1);
-//         return;  
+//         return;
 //     }
 
 //     // ESC / arrows / shift+arrows
@@ -272,25 +305,25 @@ void insert_char(GapBuffer &buffer, char c){
 //                     }
 
 //                     // 2. Move Cursor & Update Endpoint
-//                     if (dir == 'A') { 
-//                         move_cursor_up(buffer);    
-//                         SelectionService::update_endpoint(hl, buffer); 
-//                         return; 
+//                     if (dir == 'A') {
+//                         move_cursor_up(buffer);
+//                         SelectionService::update_endpoint(hl, buffer);
+//                         return;
 //                     }
-//                     if (dir == 'B') { 
-//                         move_cursor_down(buffer);  
-//                         SelectionService::update_endpoint(hl, buffer); 
-//                         return; 
+//                     if (dir == 'B') {
+//                         move_cursor_down(buffer);
+//                         SelectionService::update_endpoint(hl, buffer);
+//                         return;
 //                     }
-//                     if (dir == 'C') { 
-//                         move_cursor_right(buffer); 
-//                         SelectionService::update_endpoint(hl, buffer); 
-//                         return; 
+//                     if (dir == 'C') {
+//                         move_cursor_right(buffer);
+//                         SelectionService::update_endpoint(hl, buffer);
+//                         return;
 //                     }
-//                     if (dir == 'D') { 
-//                         move_cursor_left(buffer);  
-//                         SelectionService::update_endpoint(hl, buffer); 
-//                         return; 
+//                     if (dir == 'D') {
+//                         move_cursor_left(buffer);
+//                         SelectionService::update_endpoint(hl, buffer);
+//                         return;
 //                     }
 //                 }
 
@@ -320,8 +353,8 @@ void insert_char(GapBuffer &buffer, char c){
 //     if (c == 3){
 //         if(hl.active){
 //             string out;
-//             // You can keep this manual loop or move it to SelectionService later
-//             for (int i = hl.start; i < hl.end; i++) {
+//             // You can keep this manual loop or move it to SelectionService
+//             later for (int i = hl.start; i < hl.end; i++) {
 //                 if (i >= buffer.gap_start && i < buffer.gap_end) continue;
 //                 out.push_back(buffer.data[i]);
 //             }
@@ -340,4 +373,4 @@ void insert_char(GapBuffer &buffer, char c){
 
 //     insert_char(buffer, c);
 // }
-}
+} // namespace BufferService
