@@ -1,13 +1,30 @@
 #include "view_service.hpp"
+#include "terminal_manager.hpp"
 #include <iostream>
 
 using namespace std;
-namespace ViewService {
-void print_buffer(const GapBuffer &buffer, const Highlight &hl,
-                  bool debug_mode) {
+ViewService::ViewService(int target_width, int target_height)
+    : m_target_width(target_width), m_target_height(target_height),
+      m_top_padding(0), m_left_padding(0) {
+
+  // Calculate layout variables immediately on creation
+  update_layout();
+}
+void ViewService::update_layout() {
+  int term_w = 0, term_h = 0;
+  TerminalManager::getTerminalSize(term_w, term_h);
+
+  m_left_padding = std::max(0, (term_w - m_target_width) / 2);
+  m_top_padding = std::max(0, (term_h - m_target_height) / 2);
+
+  m_left_pad_str = std::string(m_left_padding, ' ');
+}
+void ViewService::print_buffer(const GapBuffer &buffer, const Highlight &hl,
+                               bool debug_mode) {
 
   std::string frame;
   int start_row = 0;
+  bool needs_left_pad = true;
   int cursor_row_abs = 0; // Absolute row in the file
   size_t gap_size = buffer.gap_end - buffer.gap_start;
 
@@ -30,8 +47,8 @@ void print_buffer(const GapBuffer &buffer, const Highlight &hl,
       }
     }
   }
-  if (cursor_row_abs >= TER_END_Y) {
-    start_row = cursor_row_abs - TER_END_Y + 1;
+  if (cursor_row_abs >= TER_END_Y / 2) {
+    start_row = cursor_row_abs - TER_END_Y / 2;
   }
 
   frame.reserve(buffer.data.size() + 256);
@@ -51,6 +68,11 @@ void print_buffer(const GapBuffer &buffer, const Highlight &hl,
   }
 
   frame += "\033[H";
+
+  // ---- PADDING TOP ---------
+  for (int i = 0; i < m_top_padding; i++) {
+    frame += "\033[K\n";
+  }
 
   // Build Frame AND Find Cursor
   for (size_t i = 0; i < buffer.data.size(); i++) {
@@ -89,6 +111,11 @@ void print_buffer(const GapBuffer &buffer, const Highlight &hl,
     bool visible = (row >= start_row) && (row < start_row + TER_END_Y);
 
     if (visible) {
+
+      if (needs_left_pad) {
+        frame += m_left_pad_str;
+        needs_left_pad = false;
+      }
       if (is_highlighted)
         frame += "\033[7m"; // Start Highlight
 
@@ -103,6 +130,8 @@ void print_buffer(const GapBuffer &buffer, const Highlight &hl,
     if (c == '\n') {
       row++;
       col = 0;
+      if (visible)
+        needs_left_pad = true;
     } else if (c == '\t') {
       col += (8 - (col % 8));
     } else {
@@ -111,8 +140,10 @@ void print_buffer(const GapBuffer &buffer, const Highlight &hl,
 
     // Force wrap at TER_END_X columns
     if (col >= TER_END_X && c != '\n') {
-      if (visible)
+      if (visible) {
         frame += "\033[K\n";
+        needs_left_pad = true;
+      }
       row++;
       col = 0;
     }
@@ -126,11 +157,7 @@ void print_buffer(const GapBuffer &buffer, const Highlight &hl,
   frame += "\033[0J";
 
   // Cursor movement
-  frame +=
-      "\033[" + to_string(cursor_r + 1) + ";" + to_string(cursor_c + 1) + "H";
-
-  // OUTPUT CALL
+  frame += "\033[" + to_string(cursor_r + 1 + m_top_padding) + ";" +
+           to_string(cursor_c + 1 + m_left_padding) + "H"; // OUTPUT CALL
   cout << frame << flush;
 }
-
-} // namespace ViewService

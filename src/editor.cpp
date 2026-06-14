@@ -15,11 +15,11 @@ void Editor::init(const std::string &p) {
 }
 void Editor::start_writing() {
   TerminalManager::enableRawMode();
-  ViewService::print_buffer(gap_buffer, highligter, DEBUG_GAP);
+  view_service.print_buffer(gap_buffer, highligter, DEBUG_GAP);
   while (true) {
     // BufferService::update_gap_buffer(gap_buffer, path, highligter);
     process_input();
-    ViewService::print_buffer(gap_buffer, highligter, DEBUG_GAP);
+    view_service.print_buffer(gap_buffer, highligter, DEBUG_GAP);
   }
 }
 

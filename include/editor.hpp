@@ -1,8 +1,8 @@
-// This is a Singleton Class that is going to initialize once for every user.
 
 #ifndef EDITOR_HPP
 #define EDITOR_HPP
 #include "models.hpp"
+#include "view_service.hpp"
 #include <string>
 class Editor {
 private:
@@ -10,7 +10,10 @@ private:
   GapBuffer gap_buffer;
   Highlight highligter;
   bool DEBUG_GAP;
-  Editor() : DEBUG_GAP(false) {}
+  ViewService view_service;
+  Editor()
+      : DEBUG_GAP(false),
+        view_service(ViewService::TER_END_X, ViewService::TER_END_Y) {}
   ~Editor() = default;
   void process_input();
 
