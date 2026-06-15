@@ -54,6 +54,8 @@ void move_cursor_right(GapBuffer &b) {
 }
 
 static int get_col_on_line(const GapBuffer &b) {
+  // This is a function to find the column of the cursor to move_cursor_up or
+  // move_cursor_down with trying to detect the \n.
   int col = 0;
   if (b.gap_start == 0)
     return 0;
@@ -68,71 +70,117 @@ static int get_col_on_line(const GapBuffer &b) {
       col = (col / 8 + 1) * 8;
     else
       col++;
+
+    // Terminal Limit Check.
+    // if (col >= ViewService::TER_END_X) {
+    //   return ViewService::TER_END_X;
+    // }
   }
   return col;
 }
-
 void move_cursor_up(GapBuffer &b) {
   if (b.gap_start == 0)
     return;
 
-  int target_col = get_col_on_line(b);
+  int absolute_target_col = get_col_on_line(b);
+  int visual_target_col = absolute_target_col % ViewService::TER_END_X;
 
-  // Within same logical line: move up one visual segment
-  if (target_col >= ViewService::TER_END_X) {
+  // 1. Within same logical line: move up one visual segment
+  if (absolute_target_col >= ViewService::TER_END_X) {
     for (int i = 0; i < ViewService::TER_END_X; i++) {
       if (b.gap_start == 0 || b.data[b.gap_start - 1] == '\n')
-        break;
+        break; // Failsafe
       move_cursor_left(b);
     }
     return;
   }
 
-  // Cross to previous logical line
+  // 2. Cross to previous logical line
+  // Go to start of current logical line
   while (b.gap_start > 0 && b.data[b.gap_start - 1] != '\n')
     move_cursor_left(b);
 
+  // Step over \n
   if (b.gap_start > 0)
     move_cursor_left(b);
 
+  // Go to start of previous logical line
   while (b.gap_start > 0 && b.data[b.gap_start - 1] != '\n')
     move_cursor_left(b);
 
+  // Measure the absolute width of this previous line so we don't teleport
+  int prev_line_width = 0;
+  size_t scan_idx = b.gap_end;
+  while (scan_idx < b.data.size() && b.data[scan_idx] != '\n') {
+    if (b.data[scan_idx] == '\t')
+      prev_line_width = (prev_line_width / 8 + 1) * 8;
+    else
+      prev_line_width++;
+    scan_idx++;
+  }
+
+  // Calculate where the last visual segment of this previous line starts
+  int last_segment_start_col =
+      (prev_line_width / ViewService::TER_END_X) * ViewService::TER_END_X;
+
+  // Combine that with your visual column
+  int final_target = last_segment_start_col + visual_target_col;
+
+  // Prevent overshooting if the last segment is shorter than your visual column
+  if (final_target > prev_line_width) {
+    final_target = prev_line_width;
+  }
+
+  // Move right to the precise target on the last segment
   int current_col = 0;
-  while (current_col < target_col && b.gap_end < b.data.size() &&
+  while (current_col < final_target && b.gap_end < b.data.size() &&
          b.data[b.gap_end] != '\n') {
+    if (b.data[b.gap_end] == '\t') {
+      int next_tab = (current_col / 8 + 1) * 8;
+      if (next_tab > final_target)
+        break; // Prevent tab from overshooting
+      current_col = next_tab;
+    } else {
+      current_col++;
+    }
     move_cursor_right(b);
-    current_col++;
   }
 }
-
 void move_cursor_down(GapBuffer &b) {
   int target_col = get_col_on_line(b);
 
-  // Count remaining chars on this line past the cursor
+  // Count remaining chars on this line past the cursor,
+  // but cap the count at TER_END_X to prevent O(N) forward scanning.
   size_t remaining = 0;
   size_t i = b.gap_end;
   while (i < b.data.size() && b.data[i] != '\n') {
     remaining++;
+    if (remaining >= ViewService::TER_END_X)
+      break;
     i++;
   }
 
-  // Within same logical line: move down one visual segment
+  // 1. Within same logical line: move down one visual segment
   if (remaining >= ViewService::TER_END_X) {
-    for (int j = 0; j < ViewService::TER_END_X; j++)
+    for (int j = 0; j < ViewService::TER_END_X; j++) {
+      // No \n check needed inside loop because we pre-verified with the bounded
+      // 'remaining'
       move_cursor_right(b);
+    }
     return;
   }
 
-  // Cross to next logical line
+  // 2. Cross to next logical line
   while (b.gap_end < b.data.size() && b.data[b.gap_end] != '\n')
     move_cursor_right(b);
 
+  // Step over \n
   if (b.gap_end < b.data.size())
     move_cursor_right(b);
   else
     return;
 
+  // Move right to the target visual column
   int current_col = 0;
   while (current_col < target_col && b.gap_end < b.data.size() &&
          b.data[b.gap_end] != '\n') {
@@ -140,7 +188,6 @@ void move_cursor_down(GapBuffer &b) {
     current_col++;
   }
 }
-
 void grow_gap(GapBuffer &buffer, size_t amount) {
   size_t old_size = buffer.data.size();
   size_t gap_size = amount;
