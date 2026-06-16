@@ -1,8 +1,12 @@
 #include "view_service.hpp"
+#include "editor.hpp"
 #include "terminal_manager.hpp"
+#include <algorithm>
 #include <iostream>
+#include <string>
 
 using namespace std;
+
 ViewService::ViewService(int target_width, int target_height)
     : m_target_width(target_width), m_target_height(target_height),
       m_top_padding(0), m_left_padding(0) {
@@ -10,15 +14,17 @@ ViewService::ViewService(int target_width, int target_height)
   // Calculate layout variables immediately on creation
   update_layout();
 }
+
 void ViewService::update_layout() {
   int term_w = 0, term_h = 0;
   TerminalManager::getTerminalSize(term_w, term_h);
 
   m_left_padding = std::max(0, (term_w - m_target_width) / 2);
-  m_top_padding = std::max(0, (term_h - m_target_height) / 2);
+  m_top_padding = std::max(0, (term_h - m_target_height) / 3);
 
   m_left_pad_str = std::string(m_left_padding, ' ');
 }
+
 void ViewService::print_buffer(const GapBuffer &buffer, const Highlight &hl,
                                bool debug_mode) {
 
@@ -51,7 +57,8 @@ void ViewService::print_buffer(const GapBuffer &buffer, const Highlight &hl,
     start_row = cursor_row_abs - TER_END_Y / 2;
   }
 
-  frame.reserve(buffer.data.size() + 256);
+  frame.reserve(buffer.data.size() +
+                512); // Increased reserve slightly to account for box drawing
 
   int row = 0;
   int col = 0;
@@ -155,9 +162,43 @@ void ViewService::print_buffer(const GapBuffer &buffer, const Highlight &hl,
 
   // Clear everything
   frame += "\033[0J";
+  // --- BOX DRAWING LOGIC---
+  if (m_left_padding >= 2 && m_top_padding >= 2) {
 
-  // Cursor movement
+    // Convert to 1-indexed coordinates for ANSI sequences
+    int top_y = m_top_padding - 1;
+    int bot_y = m_top_padding + TER_END_Y + 2;
+    int left_x = m_left_padding - 1;
+    int right_x = m_left_padding + TER_END_X + 2;
+
+    frame += "\033[" + to_string(top_y) + ";" + to_string(left_x) + "H";
+    frame += "┌";
+    for (int x = left_x + 1; x < right_x; ++x)
+      frame += "─";
+    frame += "┐";
+
+    frame += "\033[" + to_string(bot_y) + ";" + to_string(left_x) + "H";
+    frame += "└";
+    for (int x = left_x + 1; x < right_x; ++x)
+      frame += "─";
+    frame += "┘";
+
+    for (int y = top_y + 1; y < bot_y; ++y) {
+      frame += "\033[" + to_string(y) + ";" + to_string(left_x) + "H";
+      frame += "│"; // Left
+
+      frame += "\033[" + to_string(y) + ";" + to_string(right_x) + "H";
+      frame += "│"; // Right
+    }
+    std::string filename = Editor::get_instance().get_filename();
+    std::string display_name = " " + filename + " ";
+
+    int filename_x = right_x - static_cast<int>(display_name.length());
+    frame += "\033[" + to_string(bot_y + 1) + ";" + to_string(filename_x) + "H";
+    frame += display_name;
+  }
+
   frame += "\033[" + to_string(cursor_r + 1 + m_top_padding) + ";" +
-           to_string(cursor_c + 1 + m_left_padding) + "H"; // OUTPUT CALL
+           to_string(cursor_c + 1 + m_left_padding) + "H";
   cout << frame << flush;
 }

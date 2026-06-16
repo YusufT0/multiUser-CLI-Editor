@@ -22,7 +22,7 @@ public:
     static Editor instance;
     return instance;
   }
-
+  std::string get_filename() const { return path; }
   Editor(const Editor &) = delete; // We do not want copy constructors. Do not
                                    // create a new editor by copying an old one.
   Editor &operator=(const Editor &) =

@@ -6,10 +6,12 @@ int main(int argc, char **argv) {
     cout << "Usage: ./editor <filename>\n";
     return 1;
   }
-  // string file_name = "./test.txt";
+
+  string file_name = "";
   try {
     Editor &editor = Editor::get_instance();
-    editor.init(argv[1]);
+    file_name = argv[1];
+    editor.init(file_name);
     editor.start_writing();
 
   } catch (const std::runtime_error &e) {
