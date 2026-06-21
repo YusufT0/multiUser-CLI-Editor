@@ -3,6 +3,7 @@
 #define EDITOR_HPP
 #include "models.hpp"
 #include "view_service.hpp"
+#include <changefilemodal.hpp>
 #include <string>
 class Editor {
 private:
@@ -10,6 +11,7 @@ private:
   GapBuffer gap_buffer;
   Highlight highligter;
   bool DEBUG_GAP;
+  ChangeFileModal changefileModal;
   ViewService view_service;
   Editor()
       : DEBUG_GAP(false),
@@ -27,6 +29,7 @@ public:
                                    // create a new editor by copying an old one.
   Editor &operator=(const Editor &) =
       delete; // Do not overwrite an existing editor with an old one.
+  ChangeFileModal &get_change_file_modal() { return changefileModal; }
   void init(const std::string &p);
   void start_writing();
 };

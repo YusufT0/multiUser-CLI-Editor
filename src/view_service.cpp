@@ -2,6 +2,7 @@
 #include "editor.hpp"
 #include "terminal_manager.hpp"
 #include <algorithm>
+#include <changefilemodal.hpp>
 #include <iostream>
 #include <string>
 
@@ -25,6 +26,45 @@ void ViewService::update_layout() {
   m_left_pad_str = std::string(m_left_padding, ' ');
 }
 
+void ViewService::draw_change_file_modal(std::string &frame,
+                                         const ChangeFileModal &model,
+                                         int &out_cursor_r,
+                                         int &out_cursor_c) const {
+  int term_w, term_h;
+  TerminalManager::getTerminalSize(term_w, term_h);
+  int box_w = TER_END_X + 2;
+  int top = max(1, (term_h - 3) / 2 + 1);
+  int left = max(1, (term_w - box_w) / 2 + 1);
+
+  // Top border
+  frame += "\033[" + to_string(top) + ";" + to_string(left) + "H";
+  frame += "┌";
+  for (int i = 0; i < TER_END_X; i++)
+    frame += "─";
+  frame += "┐";
+
+  // Content line: │ File: /path                  │
+  string prefix = "File: ";
+  string content = prefix + model.get_path();
+  frame += "\033[" + to_string(top + 1) + ";" + to_string(left) + "H";
+  frame += "│ " + content;
+  int used = 2 + content.length();
+  int remaining = box_w - used - 1;
+  for (int i = 0; i < remaining; i++)
+    frame += " ";
+  frame += "│";
+
+  // Bottom border
+  frame += "\033[" + to_string(top + 2) + ";" + to_string(left) + "H";
+  frame += "└";
+  for (int i = 0; i < TER_END_X; i++)
+    frame += "─";
+  frame += "┘";
+
+  // Cursor position after "│ File: "
+  out_cursor_r = top + 1;
+  out_cursor_c = left + 2 + static_cast<int>(prefix.length() + model.get_path().length());
+}
 void ViewService::print_buffer(const GapBuffer &buffer, const Highlight &hl,
                                bool debug_mode) {
 
@@ -198,7 +238,14 @@ void ViewService::print_buffer(const GapBuffer &buffer, const Highlight &hl,
     frame += display_name;
   }
 
-  frame += "\033[" + to_string(cursor_r + 1 + m_top_padding) + ";" +
-           to_string(cursor_c + 1 + m_left_padding) + "H";
+  if (Editor::get_instance().get_change_file_modal().is_active()) {
+    int modal_r, modal_c;
+    draw_change_file_modal(frame, Editor::get_instance().get_change_file_modal(),
+                           modal_r, modal_c);
+    frame += "\033[" + to_string(modal_r) + ";" + to_string(modal_c) + "H";
+  } else {
+    frame += "\033[" + to_string(cursor_r + 1 + m_top_padding) + ";" +
+             to_string(cursor_c + 1 + m_left_padding) + "H";
+  }
   cout << frame << flush;
 }

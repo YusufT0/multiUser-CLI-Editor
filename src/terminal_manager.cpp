@@ -40,15 +40,6 @@ void getTerminalSize(int &width, int &height) {
   }
 #endif
 }
-static bool read_byte(char &c) {
-#ifdef _WIN32
-  // _read reads from file descriptor 0 (stdin)
-  return _read(0, &c, 1) == 1;
-#else
-  return read(STDIN_FILENO, &c, 1) == 1;
-#endif
-}
-
 void disableRawMode() {
 #ifdef _WIN32
   SetConsoleMode(hStdin, originalMode);
@@ -85,79 +76,73 @@ void enableRawMode() {
 }
 
 InputEvent read_input() {
-  char c;
-  if (!read_byte(c))
+  char buf[8]; // This is 8 char because the longest sequence we can get is 8.
+  int n;
+#ifdef _WIN32
+  n = _read(0, buf, sizeof(buf));
+#else
+  n = read(STDIN_FILENO, buf, sizeof(buf));
+#endif
+  if (n <= 0)
     return {Key::None};
+
+  char c = buf[0];
 
   if (c == 127 || c == '\b')
     return {Key::Backspace};
   if (c == 13 || c == '\n')
-    return {Key::Enter, '\n'}; // Windows often sends 13 (\r)
+    return {Key::Enter, '\n'};
   if (c == 17)
-    return {Key::Quit}; // Ctrl+Q
+    return {Key::Quit};
   if (c == 3)
-    return {Key::Copy}; // Ctrl+C (Raw)
+    return {Key::Copy};
   if (c == 22)
-    return {Key::Paste}; // Ctrl+V
+    return {Key::Paste};
   if (c == 19)
-    return {Key::Save}; // Ctrl+S
+    return {Key::Save};
+  if (c == 14)
+    return {Key::ChangeFile};
 
-  if (c == 27) { // \x1b
-    char seq[3];
-
-    if (!read_byte(seq[0]))
+  if (c == 27) {
+    if (n < 2)
       return {Key::Escape};
 
-    if (seq[0] == '[') {
-      if (!read_byte(seq[1]))
+    if (buf[1] == '[') {
+      if (n < 3)
         return {Key::Escape};
-
-      // Standard Arrows
-      if (seq[1] == 'A')
+      char dir = buf[2];
+      if (dir == 'A')
         return {Key::Up};
-      if (seq[1] == 'B')
+      if (dir == 'B')
         return {Key::Down};
-      if (seq[1] == 'C')
+      if (dir == 'C')
         return {Key::Right};
-      if (seq[1] == 'D')
+      if (dir == 'D')
         return {Key::Left};
 
-      // (Shift/Ctrl + Arrow)"
-      if (seq[1] == '1') {
-        char sep, mod, dir;
-
-        if (!read_byte(sep))
-          return {Key::Escape}; // Expect ';'
-        if (!read_byte(mod))
-          return {Key::Escape}; // Expect Modifier
-        if (!read_byte(dir))
-          return {Key::Escape}; // Expect Direction
-
+      if (dir == '1' && n >= 6) {
+        char mod = buf[4];
+        char dir2 = buf[5];
         bool is_shift = (mod == '2' || mod == '6');
         bool is_ctrl = (mod == '5' || mod == '6');
-
         Key k = Key::None;
-        if (dir == 'A')
+        if (dir2 == 'A')
           k = Key::Up;
-        if (dir == 'B')
+        if (dir2 == 'B')
           k = Key::Down;
-        if (dir == 'C')
+        if (dir2 == 'C')
           k = Key::Right;
-        if (dir == 'D')
+        if (dir2 == 'D')
           k = Key::Left;
-
         return {k, 0, is_shift, is_ctrl};
       }
     }
     return {Key::Escape};
   }
 
-  // Skip UTF-8 Continuation
-  if ((unsigned char)c >= 0xC2) {
-    char throwaway;
-    read_byte(throwaway);
+  // Skip UTF-8 continuation (entire multi-byte consumed in the single read)
+  if ((unsigned char)c >= 0xC2)
     return {Key::None};
-  }
 
   return {Key::Char, c};
 }

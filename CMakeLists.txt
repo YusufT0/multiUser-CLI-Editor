@@ -8,12 +8,12 @@ set(CMAKE_BUILD_TYPE Debug)
 include_directories(include libs)
 
 if(WIN32)
-    # WINDOWS (MSVC)
-    add_compile_definitions(_WIN32)
-    add_compile_options(/W4 /D_CRT_SECURE_NO_WARNINGS)
+  # WINDOWS (MSVC)
+  add_compile_definitions(_WIN32)
+  add_compile_options(/W4 /D_CRT_SECURE_NO_WARNINGS)
 
 else()
-    add_compile_options(-Wall -Wextra -pedantic)
+  add_compile_options(-Wall -Wextra -pedantic)
 endif()
 
 add_library(gapbuffer
@@ -24,6 +24,7 @@ add_library(gapbuffer
     src/editor.cpp
     src/view_service.cpp
     src/selection_service.cpp
+    src/changefilemodal.cpp
 )
 
 add_executable(editor

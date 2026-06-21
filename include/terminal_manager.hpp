@@ -17,6 +17,7 @@ enum class Key {
   Copy,
   Paste,
   Quit,
+  ChangeFile,
   Save
 };
 struct InputEvent {

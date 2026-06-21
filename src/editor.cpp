@@ -29,6 +29,18 @@ void Editor::process_input() {
   if (e.key == Key::None)
     return;
 
+  if (changefileModal.is_active()) {
+    bool done = changefileModal.handleInput(e);
+    if (done) {
+      if (changefileModal.is_confirmed()) {
+        save_file(gap_buffer, path);
+        init(changefileModal.get_path());
+      }
+      changefileModal.deactivate();
+    }
+    return;
+  }
+
   // If Shift is held, ensure we are in selection mode.
   if (e.shift_held && !highligter.active) {
     SelectionService::start(highligter, gap_buffer);
@@ -105,10 +117,13 @@ void Editor::process_input() {
 
     SelectionService::clear(highligter);
   } break;
+  case Key::ChangeFile: {
+    changefileModal.activate();
+    break;
+  }
   default:
     break;
   }
-
   if (e.shift_held) {
     SelectionService::update_endpoint(highligter, gap_buffer);
   }
