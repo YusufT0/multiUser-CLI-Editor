@@ -63,7 +63,8 @@ void ViewService::draw_change_file_modal(std::string &frame,
 
   // Cursor position after "│ File: "
   out_cursor_r = top + 1;
-  out_cursor_c = left + 2 + static_cast<int>(prefix.length() + model.get_path().length());
+  out_cursor_c =
+      left + 2 + static_cast<int>(prefix.length() + model.get_path().length());
 }
 void ViewService::print_buffer(const GapBuffer &buffer, const Highlight &hl,
                                bool debug_mode) {
@@ -237,10 +238,11 @@ void ViewService::print_buffer(const GapBuffer &buffer, const Highlight &hl,
     frame += "\033[" + to_string(bot_y + 1) + ";" + to_string(filename_x) + "H";
     frame += display_name;
   }
-
+  // ------ FILE CHANGING MODAL -------
   if (Editor::get_instance().get_change_file_modal().is_active()) {
     int modal_r, modal_c;
-    draw_change_file_modal(frame, Editor::get_instance().get_change_file_modal(),
+    draw_change_file_modal(frame,
+                           Editor::get_instance().get_change_file_modal(),
                            modal_r, modal_c);
     frame += "\033[" + to_string(modal_r) + ";" + to_string(modal_c) + "H";
   } else {
