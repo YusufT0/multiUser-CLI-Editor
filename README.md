@@ -6,7 +6,11 @@ It is a basic text editor for now. It has the basic features that every text edi
 3. You can move word by word via CTRL and arrow keys. <br>
 4. You can highlight words with SHIFT. <br>
 5. You can copy and paste everything with CTRL+C and CTRL+V <br>
-6. Writing more than a spesific row count triggers scrolling.
+6. Writing more than a specific row count triggers scrolling.
+7. Network structure is partially done. You can start the editor as a host or as a client.
+   Clients can only listen to the host.
+   Hosts can alter the file.
+   Clients can use the other functionalities like saving file.
 
 # Restrictions
 1. It will work properly only if you adjust your terminal to be length of 40 lines or more. If it is less cursor loses its mind.

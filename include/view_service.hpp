@@ -11,6 +11,7 @@ public:
   void draw_change_file_modal(std::string &frame, const ChangeFileModal &model,
                               int &out_cursor_r, int &out_cursor_c) const;
   void update_layout();
+  void draw_log_window(std::string &frame) const;
   static const int TER_END_Y = 20;
   static const int TER_END_X = 60;
 

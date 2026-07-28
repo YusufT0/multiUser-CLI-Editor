@@ -244,6 +244,15 @@ void grow_gap(GapBuffer &buffer, size_t amount) {
 //     cout << "\033[" << pos.row+1 << ";" << pos.col+1 << "H" << flush;
 // }
 
+std::string serialize_buffer(const GapBuffer &buffer) {
+  std::string result;
+  result.reserve(buffer.data.size() - (buffer.gap_end - buffer.gap_start));
+  for (size_t i = 0; i < buffer.gap_start; i++)
+    result.push_back(buffer.data[i]);
+  for (size_t i = buffer.gap_end; i < buffer.data.size(); i++)
+    result.push_back(buffer.data[i]);
+  return result;
+}
 void insert_char(GapBuffer &buffer, char c) {
 
   if (buffer.gap_start == buffer.gap_end) {

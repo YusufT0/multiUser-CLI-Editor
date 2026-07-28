@@ -1,5 +1,6 @@
 #include "view_service.hpp"
 #include "editor.hpp"
+#include "logger.hpp"
 #include "terminal_manager.hpp"
 #include <algorithm>
 #include <changefilemodal.hpp>
@@ -25,7 +26,20 @@ void ViewService::update_layout() {
 
   m_left_pad_str = std::string(m_left_padding, ' ');
 }
-
+void ViewService::draw_log_window(std::string &frame) const {
+  auto logs = Logger::instance().get_logs();
+  if (logs.empty())
+    return;
+  int log_start_y = m_top_padding + TER_END_Y + 4;
+  for (size_t i = 0; i < logs.size(); i++) {
+    frame += "\033[" + to_string(log_start_y + i) + ";" +
+             to_string(m_left_padding) + "H";
+    frame += "\033[K";
+    frame += "\033[90m";
+    frame += "> " + logs[i];
+    frame += "\033[0m";
+  }
+}
 void ViewService::draw_change_file_modal(std::string &frame,
                                          const ChangeFileModal &model,
                                          int &out_cursor_r,
@@ -35,7 +49,6 @@ void ViewService::draw_change_file_modal(std::string &frame,
   int box_w = TER_END_X + 2;
   int top = max(1, (term_h - 3) / 2 + 1);
   int left = max(1, (term_w - box_w) / 2 + 1);
-
   // Top border
   frame += "\033[" + to_string(top) + ";" + to_string(left) + "H";
   frame += "┌";
@@ -237,6 +250,7 @@ void ViewService::print_buffer(const GapBuffer &buffer, const Highlight &hl,
     int filename_x = right_x - static_cast<int>(display_name.length());
     frame += "\033[" + to_string(bot_y + 1) + ";" + to_string(filename_x) + "H";
     frame += display_name;
+    draw_log_window(frame);
   }
   // ------ FILE CHANGING MODAL -------
   if (Editor::get_instance().get_change_file_modal().is_active()) {

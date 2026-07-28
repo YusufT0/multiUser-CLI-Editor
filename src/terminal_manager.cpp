@@ -74,7 +74,28 @@ void enableRawMode() {
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 #endif
 }
-
+InputEvent read_input_non_blocking() {
+#ifdef _WIN32
+  // Windows: use PeekNamedPipe or WaitForSingleObject with 0 timeout
+  DWORD events;
+  INPUT_RECORD rec;
+  if (!GetNumberOfConsoleInputEvents(GetStdHandle(STD_INPUT_HANDLE), &events) ||
+      events == 0)
+    return {Key::None};
+  // Fall through to blocking read if there is something
+  return read_input();
+#else
+  fd_set fds;
+  FD_ZERO(&fds);
+  FD_SET(STDIN_FILENO, &fds);
+  struct timeval tv;
+  tv.tv_sec = 0;
+  tv.tv_usec = 0;
+  if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0)
+    return {Key::None};
+  return read_input();
+#endif
+}
 InputEvent read_input() {
   char buf[8]; // This is 8 char because the longest sequence we can get is 8.
   int n;
@@ -98,6 +119,8 @@ InputEvent read_input() {
     return {Key::Copy};
   if (c == 22)
     return {Key::Paste};
+  if (c == 24)
+    return {Key::AqLock};
   if (c == 19)
     return {Key::Save};
   if (c == 14)

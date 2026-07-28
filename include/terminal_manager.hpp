@@ -18,7 +18,8 @@ enum class Key {
   Paste,
   Quit,
   ChangeFile,
-  Save
+  Save,
+  AqLock
 };
 struct InputEvent {
   Key key = Key::None;
@@ -27,5 +28,5 @@ struct InputEvent {
   bool ctrl_held = false;
 };
 InputEvent read_input();
-
+InputEvent read_input_non_blocking();
 } // namespace TerminalManager
