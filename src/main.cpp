@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
     cout << "  Ctrl+Q          Save and quit (host) / Quit (client)\n";
     cout << "  Ctrl+C          Copy selected text\n";
     cout << "  Ctrl+V          Paste from clipboard\n";
-    cout << "  Ctrl+N          Change file (host only)\n";
+    cout << "  Ctrl+N          Change file (offline only)\n";
     cout << "  Arrows          Move cursor\n";
     cout << "  Ctrl+Arrows     Move word left/right\n";
     cout << "  Shift+Arrows    Select text\n";
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
         int port = stoi(target.substr(colon + 1));
         editor.init("");
         editor.start_client(host, port);
-        editor.start_writing();
+        editor.run();
         return 0;
       }
     }
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
     if (host_mode) {
       editor.start_host(port);
     }
-    editor.start_writing();
+    editor.run();
 
   } catch (const std::exception &e) {
     cerr << e.what() << '\n';
