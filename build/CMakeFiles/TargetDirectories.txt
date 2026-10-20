@@ -1,0 +1,4 @@
+/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build/CMakeFiles/gapbuffer.dir
+/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build/CMakeFiles/editor.dir
+/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build/CMakeFiles/edit_cache.dir
+/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build/CMakeFiles/rebuild_cache.dir

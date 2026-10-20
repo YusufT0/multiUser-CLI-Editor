@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 
-struct CursorPos { int row; int col; };
+// struct CursorPos { int row; int col; };
 
 struct GapBuffer {
     std::vector<char> data;

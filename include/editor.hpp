@@ -14,12 +14,13 @@ class Editor {
 private:
   enum class Mode { Offline, Host, Client };
   Mode mode_ = Mode::Offline;
-  InputHandler *input_handler_ = nullptr;
+  std::unique_ptr<InputHandler> input_handler_;
   std::unique_ptr<tcp_server> server_;
   std::unique_ptr<tcp_client> client_;
   std::thread network_thread_;
   std::shared_ptr<asio::io_context> io_context_;
   bool running_ = false;
+  bool dirty_ = true;
   std::string path;
   GapBuffer gap_buffer;
   Highlight highligter;

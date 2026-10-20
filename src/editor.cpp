@@ -15,6 +15,7 @@ void Editor::init(const std::string &p) {
   path = p;
   gap_buffer = load_file(p);
   DEBUG_GAP = false;
+  dirty_ = true;
 }
 
 void Editor::run() {
@@ -26,7 +27,10 @@ void Editor::run() {
   while (running_) {
     poll_network();
     process_input();
-    view_service.print_buffer(gap_buffer, highligter, DEBUG_GAP);
+    if (dirty_) {
+      view_service.print_buffer(gap_buffer, highligter, DEBUG_GAP);
+      dirty_ = false;
+    }
     usleep(10000);
   }
   shutdown();
@@ -44,6 +48,7 @@ void Editor::poll_network() {
     cursor = text.size();
   gap_buffer.gap_start = cursor;
   gap_buffer.gap_end = cursor;
+  dirty_ = true;
 }
 
 void Editor::start_host(int port) {
@@ -66,8 +71,7 @@ void Editor::start_client(const std::string &host, int port) {
 }
 
 void Editor::shutdown() {
-  delete input_handler_;
-  input_handler_ = nullptr;
+  input_handler_.reset();
   if (server_)
     server_->stop();
   if (client_)
@@ -92,6 +96,7 @@ void Editor::process_input() {
   TerminalManager::InputEvent e = TerminalManager::read_input_non_blocking();
   if (e.key == TerminalManager::Key::None)
     return;
+  dirty_ = true;
 
   if (changefileModal.is_active()) {
     bool done = changefileModal.handleInput(e);

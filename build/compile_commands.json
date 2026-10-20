@@ -1,0 +1,74 @@
+[
+{
+  "directory": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build",
+  "command": "/usr/bin/c++ -DASIO_STANDALONE -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/include -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs/asio/include -g -std=gnu++17 -Wall -Wextra -pedantic -o CMakeFiles/gapbuffer.dir/src/buffer_service.cpp.o -c /home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/buffer_service.cpp",
+  "file": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/buffer_service.cpp",
+  "output": "CMakeFiles/gapbuffer.dir/src/buffer_service.cpp.o"
+},
+{
+  "directory": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build",
+  "command": "/usr/bin/c++ -DASIO_STANDALONE -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/include -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs/asio/include -g -std=gnu++17 -Wall -Wextra -pedantic -o CMakeFiles/gapbuffer.dir/src/file_io.cpp.o -c /home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/file_io.cpp",
+  "file": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/file_io.cpp",
+  "output": "CMakeFiles/gapbuffer.dir/src/file_io.cpp.o"
+},
+{
+  "directory": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build",
+  "command": "/usr/bin/c++ -DASIO_STANDALONE -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/include -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs/asio/include -g -std=gnu++17 -Wall -Wextra -pedantic -o CMakeFiles/gapbuffer.dir/src/terminal_manager.cpp.o -c /home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/terminal_manager.cpp",
+  "file": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/terminal_manager.cpp",
+  "output": "CMakeFiles/gapbuffer.dir/src/terminal_manager.cpp.o"
+},
+{
+  "directory": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build",
+  "command": "/usr/bin/c++ -DASIO_STANDALONE -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/include -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs/asio/include -g -std=gnu++17 -Wall -Wextra -pedantic -o CMakeFiles/gapbuffer.dir/src/clipboard.cpp.o -c /home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/clipboard.cpp",
+  "file": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/clipboard.cpp",
+  "output": "CMakeFiles/gapbuffer.dir/src/clipboard.cpp.o"
+},
+{
+  "directory": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build",
+  "command": "/usr/bin/c++ -DASIO_STANDALONE -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/include -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs/asio/include -g -std=gnu++17 -Wall -Wextra -pedantic -o CMakeFiles/gapbuffer.dir/src/editor.cpp.o -c /home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/editor.cpp",
+  "file": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/editor.cpp",
+  "output": "CMakeFiles/gapbuffer.dir/src/editor.cpp.o"
+},
+{
+  "directory": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build",
+  "command": "/usr/bin/c++ -DASIO_STANDALONE -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/include -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs/asio/include -g -std=gnu++17 -Wall -Wextra -pedantic -o CMakeFiles/gapbuffer.dir/src/view_service.cpp.o -c /home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/view_service.cpp",
+  "file": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/view_service.cpp",
+  "output": "CMakeFiles/gapbuffer.dir/src/view_service.cpp.o"
+},
+{
+  "directory": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build",
+  "command": "/usr/bin/c++ -DASIO_STANDALONE -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/include -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs/asio/include -g -std=gnu++17 -Wall -Wextra -pedantic -o CMakeFiles/gapbuffer.dir/src/selection_service.cpp.o -c /home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/selection_service.cpp",
+  "file": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/selection_service.cpp",
+  "output": "CMakeFiles/gapbuffer.dir/src/selection_service.cpp.o"
+},
+{
+  "directory": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build",
+  "command": "/usr/bin/c++ -DASIO_STANDALONE -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/include -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs/asio/include -g -std=gnu++17 -Wall -Wextra -pedantic -o CMakeFiles/gapbuffer.dir/src/changefilemodal.cpp.o -c /home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/changefilemodal.cpp",
+  "file": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/changefilemodal.cpp",
+  "output": "CMakeFiles/gapbuffer.dir/src/changefilemodal.cpp.o"
+},
+{
+  "directory": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build",
+  "command": "/usr/bin/c++ -DASIO_STANDALONE -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/include -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs/asio/include -g -std=gnu++17 -Wall -Wextra -pedantic -o CMakeFiles/gapbuffer.dir/src/network_models.cpp.o -c /home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/network_models.cpp",
+  "file": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/network_models.cpp",
+  "output": "CMakeFiles/gapbuffer.dir/src/network_models.cpp.o"
+},
+{
+  "directory": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build",
+  "command": "/usr/bin/c++ -DASIO_STANDALONE -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/include -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs/asio/include -g -std=gnu++17 -Wall -Wextra -pedantic -o CMakeFiles/gapbuffer.dir/src/logger.cpp.o -c /home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/logger.cpp",
+  "file": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/logger.cpp",
+  "output": "CMakeFiles/gapbuffer.dir/src/logger.cpp.o"
+},
+{
+  "directory": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build",
+  "command": "/usr/bin/c++ -DASIO_STANDALONE -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/include -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs/asio/include -g -std=gnu++17 -Wall -Wextra -pedantic -o CMakeFiles/gapbuffer.dir/src/input_handler.cpp.o -c /home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/input_handler.cpp",
+  "file": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/input_handler.cpp",
+  "output": "CMakeFiles/gapbuffer.dir/src/input_handler.cpp.o"
+},
+{
+  "directory": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/build",
+  "command": "/usr/bin/c++ -DASIO_STANDALONE -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/include -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs -I/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/libs/asio/include -g -std=gnu++17 -Wall -Wextra -pedantic -o CMakeFiles/editor.dir/src/main.cpp.o -c /home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/main.cpp",
+  "file": "/home/yusuf/Desktop/Projects/multiUser-CLI-Editor2/multiUser-CLI-Editor/src/main.cpp",
+  "output": "CMakeFiles/editor.dir/src/main.cpp.o"
+}
+]

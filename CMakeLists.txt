@@ -33,7 +33,6 @@ add_library(gapbuffer
     src/network_models.cpp
     src/logger.cpp
     src/input_handler.cpp
-    src/input_handler.cpp
 )
 
 # 2. Tell Asio to compile without looking for Boost
